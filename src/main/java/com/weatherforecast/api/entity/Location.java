@@ -70,4 +70,10 @@ public class Location {
     public int hashCode() {
         return Objects.hash(code);
     }
+
+    @Override
+    public String toString() {
+        return "Location [code=" + code + ", cityName=" + cityName + ", regionName=" + regionName + ", countryCode="
+                + countryCode + ", countryName=" + countryName + ", enabled=" + enabled + ", trashed=" + trashed + "]";
+    }
 }
