@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +56,16 @@ public class LocationController {
         try {
             Location updateLocation = locationService.update(location);
             return ResponseEntity.ok().body(updateLocation);
+        } catch (LocationNotFoundException exception) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{code}")
+    public ResponseEntity<?> deleteLocation(@PathVariable String code) {
+        try {
+            locationService.delete(code);
+            return ResponseEntity.noContent().build();
         } catch (LocationNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }

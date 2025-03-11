@@ -9,10 +9,12 @@ import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.repository.LocationRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LocationService {
 
     private LocationRepository locationRepository;
@@ -37,13 +39,23 @@ public class LocationService {
         if (Objects.isNull(location)) {
             throw new LocationNotFoundException("Location not found with code: " + code);
         }
-        
+
         location.setCityName(locationInRequest.getCityName());
         location.setRegionName(locationInRequest.getRegionName());
         location.setCountryCode(locationInRequest.getCountryCode());
         location.setCountryName(locationInRequest.getCountryName());
         location.setEnabled(locationInRequest.getEnabled());
         return locationRepository.save(location);
+    }
+
+    public void delete(String code) throws LocationNotFoundException {
+        Location location = locationRepository.findByCode(code);
+
+        if (Objects.isNull(location)) {
+            throw new LocationNotFoundException("Location not found with code: " + code);
+        }
+        
+        locationRepository.trashByCode(code);;
     }
     
 }

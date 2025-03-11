@@ -14,6 +14,7 @@ import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.LocationService;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -199,6 +200,31 @@ public class LocationControllerTests {
         .andExpect(jsonPath("$.city_name", is("New York City Test")))
         .andExpect(jsonPath("$.region_name", is("New York Test")))
         .andExpect(jsonPath("$.country_code", is("US")))
+        .andDo(print());
+    }
+
+    @Test
+    public void testDeleteShouldReturn404NotFound() throws Exception {
+
+        String code = "codeTest";
+        String requestUrl = END_POINT_PATH + "/" + code;
+
+        Mockito.doThrow(LocationNotFoundException.class).when(locationService).delete(code);
+
+        mockMvc.perform(delete(requestUrl))
+        .andExpect(status().isNotFound())
+        .andDo(print());
+    }
+
+    @Test
+    public void testDeleteShouldReturn204NoContent() throws Exception {
+        String code = "codeTest";
+        String requestUrl = END_POINT_PATH + "/" + code;
+
+        Mockito.doNothing().when(locationService).delete(code);
+
+        mockMvc.perform(delete(requestUrl))
+        .andExpect(status().isNoContent())
         .andDo(print());
     }
 

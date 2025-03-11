@@ -68,4 +68,12 @@ public class LocationRepositoryTests {
         Location location = locationRepository.findByCode("Test");
         assertNull(location);
     }
+
+    @Test
+    public void testTrashSuccess() {
+        String code = "NYC_USA";
+        locationRepository.trashByCode(code);
+        Location location = locationRepository.findByCode(code);
+        assertNull(location);
+    }
 }
