@@ -13,4 +13,8 @@ public interface LocationRepository extends CrudRepository<Location, String> {
 
     @Query("SELECT l FROM Location l WHERE l.trashed = false")
     public List<Location> findUnTrashed();
+
+    @Query("SELECT l FROM Location l WHERE l.code = :code")
+    public Location findByCode(String code);
+
 }

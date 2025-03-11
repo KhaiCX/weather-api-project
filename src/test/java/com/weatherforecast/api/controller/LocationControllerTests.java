@@ -1,5 +1,6 @@
 package com.weatherforecast.api.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,29 @@ public class LocationControllerTests {
 
     @Autowired
     private LocationService locationService;
+
+    private Location location1;
+    private Location location2;
+
+    @BeforeEach
+    public void createData() {
+        location1 = new Location();
+        location1.setCode("NYC_USA");
+        location1.setCityName("New York City");
+        location1.setRegionName("New York");
+        location1.setCountryCode("US");
+        location1.setCountryName("United States of America");
+        location1.setEnabled(true);
+
+        location2 = new Location();
+        location2.setCode("LACA_USA");
+        location2.setCityName("Los Angerles City");
+        location2.setRegionName("Los Angerles");
+        location2.setCountryCode("US");
+        location2.setCountryName("United States of Los Angerles");
+        location2.setEnabled(true);
+        location2.setTrashed(true);
+    }
     
     @Test
     public void testAddShouldReturn400BadRequest() throws Exception {
@@ -51,17 +75,17 @@ public class LocationControllerTests {
 
     @Test
     public void testAddShouldReturn201Created() throws Exception {
-        Location location = new Location();
-        location.setCode("NYC_USA");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
-        location.setEnabled(true);
+        // Location location = new Location();
+        // location.setCode("NYC_USA");
+        // location.setCityName("New York City");
+        // location.setRegionName("New York");
+        // location.setCountryCode("US");
+        // location.setCountryName("United States of America");
+        // location.setEnabled(true);
 
-        Mockito.when(locationService.add(location)).thenReturn(location);
+        Mockito.when(locationService.add(location1)).thenReturn(location1);
 
-        String bodyContent = objectMapper.writeValueAsString(location);
+        String bodyContent = objectMapper.writeValueAsString(location1);
 
         mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
         .andExpect(status().isCreated())
@@ -81,22 +105,22 @@ public class LocationControllerTests {
 
     @Test
     public void testListShouldReturn200OK() throws Exception {
-        Location location1 = new Location();
-        location1.setCode("NYC_USA");
-        location1.setCityName("New York City");
-        location1.setRegionName("New York");
-        location1.setCountryCode("US");
-        location1.setCountryName("United States of America");
-        location1.setEnabled(true);
+        // Location location1 = new Location();
+        // location1.setCode("NYC_USA");
+        // location1.setCityName("New York City");
+        // location1.setRegionName("New York");
+        // location1.setCountryCode("US");
+        // location1.setCountryName("United States of America");
+        // location1.setEnabled(true);
 
-        Location location2 = new Location();
-        location2.setCode("LACA_USA");
-        location2.setCityName("Los Angerles City");
-        location2.setRegionName("Los Angerles");
-        location2.setCountryCode("US");
-        location2.setCountryName("United States of Los Angerles");
-        location2.setEnabled(true);
-        location2.setTrashed(true);
+        // Location location2 = new Location();
+        // location2.setCode("LACA_USA");
+        // location2.setCityName("Los Angerles City");
+        // location2.setRegionName("Los Angerles");
+        // location2.setCountryCode("US");
+        // location2.setCountryName("United States of Los Angerles");
+        // location2.setEnabled(true);
+        // location2.setTrashed(true);
 
         Mockito.when(locationService.list()).thenReturn(List.of(location1, location2));
 
@@ -105,6 +129,32 @@ public class LocationControllerTests {
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$[0].code", is("NYC_USA")))
         .andExpect(jsonPath("$[1].code", is("LACA_USA")))
+        .andDo(print());
+    }
+
+    @Test
+    public void testGetShouldReturn405NotAllowed() throws Exception {
+        String requestUrl = END_POINT_PATH + "/codeTest";
+        mockMvc.perform(post(requestUrl))
+        .andExpect(status().isMethodNotAllowed())
+        .andDo(print());
+    }
+
+    @Test
+    public void testGetShouldReturn404NotFound() throws Exception {
+        String requestUrl = END_POINT_PATH + "/codeTest";
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isNotFound())
+        .andDo(print());
+    }
+
+    @Test
+    public void testGetShouldReturn200OK() throws Exception {
+        String code = "NYC_USA";
+        Mockito.when(locationService.get(code)).thenReturn(location1);
+        String requestUrl = END_POINT_PATH + "/" + code;
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isOk())
         .andDo(print());
     }
 

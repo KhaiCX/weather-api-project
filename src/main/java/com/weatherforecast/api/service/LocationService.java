@@ -22,4 +22,9 @@ public class LocationService {
     public List<Location> list() {
         return locationRepository.findUnTrashed();
     }
+
+    public Location get(String code) {
+        return locationRepository.findByCode(code);
+    }
+    
 }

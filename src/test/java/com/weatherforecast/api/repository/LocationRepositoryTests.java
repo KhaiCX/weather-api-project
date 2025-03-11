@@ -3,6 +3,7 @@ package com.weatherforecast.api.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
@@ -54,5 +55,17 @@ public class LocationRepositoryTests {
         List<Location> locations = locationRepository.findUnTrashed();
         assertNotEquals(locations.size(), 0);
         locations.forEach(System.out::println);
+    }
+
+    @Test
+    public void testGetNotFound() {
+        Location location = locationRepository.findByCode(savedLocation.getCode());
+        assertNotNull(location);
+    }
+
+    @Test
+    public void testGetFound() {
+        Location location = locationRepository.findByCode("Test");
+        assertNull(location);
     }
 }
