@@ -13,11 +13,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class LocationService {
 
     private LocationRepository locationRepository;
+
+    public LocationService(LocationRepository locationRepository) {
+        this.locationRepository = locationRepository;
+    }
 
     public Location add(Location location) {
         return locationRepository.save(location);
@@ -54,7 +57,7 @@ public class LocationService {
         if (Objects.isNull(location)) {
             throw new LocationNotFoundException("Location not found with code: " + code);
         }
-        
+
         locationRepository.trashByCode(code);;
     }
     
