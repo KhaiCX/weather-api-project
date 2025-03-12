@@ -62,6 +62,13 @@ public class Location {
     @JsonIgnore
     private Boolean trashed;
 
+    public Location(String cityName, String regionName, String countryCode, String countryName) {
+        this.cityName = cityName;
+        this.regionName = regionName;
+        this.countryCode = countryCode;
+        this.countryName = countryName;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
