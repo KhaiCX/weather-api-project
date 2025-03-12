@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 
 import com.weatherforecast.api.entity.Location;
+import com.weatherforecast.api.entity.RealtimeWeather;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -75,5 +78,25 @@ public class LocationRepositoryTests {
         locationRepository.trashByCode(code);
         Location location = locationRepository.findByCode(code);
         assertNull(location);
+    }
+
+    @Test
+    public void testAddRealtimeWeatherData() {
+        String code = "NYC_USA";
+        Location location = locationRepository.findByCode(code);
+        RealtimeWeather realtimeWeather = location.getRealtimeWeather();
+        if (Objects.isNull(realtimeWeather)) {
+            realtimeWeather = new RealtimeWeather();
+            realtimeWeather.setLocation(location);
+            location.setRealtimeWeather(realtimeWeather);
+        }
+        realtimeWeather.setTemperature(10);
+        realtimeWeather.setHumidity(60);
+        realtimeWeather.setPrecipitation(70);
+        realtimeWeather.setStatus("Sunny");
+        realtimeWeather.setLastUpdated(LocalDateTime.now());
+
+        Location saveLocation = locationRepository.save(location);
+        assertEquals(saveLocation.getRealtimeWeather().getLocationCode(), code);
     }
 }

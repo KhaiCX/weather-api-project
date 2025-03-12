@@ -265,7 +265,7 @@ public class LocationControllerTests {
         mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType("application/json"))
-        .andExpect(jsonPath("$.errors[0]", is("Location code mus have a length between 3 and 12")))
+        .andExpect(jsonPath("$.errors[0]", is("Location code must have a length between 3 and 12")))
         .andDo(print());
 
     }
