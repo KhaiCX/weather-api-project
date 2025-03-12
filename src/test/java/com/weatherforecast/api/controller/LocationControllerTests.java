@@ -228,4 +228,46 @@ public class LocationControllerTests {
         .andDo(print());
     }
 
+    @Test
+    public void testValidateRequestBodyLocationCode() throws Exception {
+
+        Location location = new Location();
+        //location.setCode("NYC_USA");
+        location.setCityName("New York City");
+        location.setRegionName("New York");
+        location.setCountryCode("US");
+        location.setCountryName("United States of America");
+        location.setEnabled(true);
+        
+        String bodyContent = objectMapper.writeValueAsString(location);
+
+        mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType("application/json"))
+        .andExpect(jsonPath("$.errors[0]", is("Location code cannot be null")))
+        .andDo(print());
+
+    }
+
+    @Test
+    public void testValidateRequestBodyLocationCodeLength() throws Exception {
+
+        Location location = new Location();
+        location.setCode("");
+        location.setCityName("New York City");
+        location.setRegionName("New York");
+        location.setCountryCode("US");
+        location.setCountryName("United States of America");
+        location.setEnabled(true);
+        
+        String bodyContent = objectMapper.writeValueAsString(location);
+
+        mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType("application/json"))
+        .andExpect(jsonPath("$.errors[0]", is("Location code mus have a length between 3 and 12")))
+        .andDo(print());
+
+    }
+
 }

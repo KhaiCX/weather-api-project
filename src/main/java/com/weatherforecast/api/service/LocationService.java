@@ -10,7 +10,6 @@ import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.repository.LocationRepository;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
