@@ -2,6 +2,8 @@ package com.weatherforecast.api.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,9 +29,13 @@ public class RealtimeWeather {
     private String locationCode;
     private Integer temperature;
     private Integer humidity;
+
+    @JsonProperty("wind_speed")
     private Integer windSpeed;
     private Integer precipitation;
     private String status;
+
+    @JsonProperty("last_updated")
     private LocalDateTime lastUpdated;
 
     @OneToOne

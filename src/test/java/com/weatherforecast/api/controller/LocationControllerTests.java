@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.weatherforecast.api.config.TestLocationConfig;
+import com.weatherforecast.api.config.TestConfig;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.LocationService;
@@ -30,7 +30,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(LocationController.class)
-@Import(TestLocationConfig.class)
+@Import(TestConfig.class)
 public class LocationControllerTests {
 
     private static final String END_POINT_PATH = "/v1/locations";

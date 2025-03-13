@@ -1,6 +1,8 @@
 package com.weatherforecast.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDateTime;
 
@@ -34,6 +36,24 @@ public class RealtimeWeatherRepositoryTests {
 
         RealtimeWeather updatedRealtimeWeather = realtimeWeatherRepository.save(realtimeWeather);
         assertEquals(updatedRealtimeWeather.getHumidity(), 32);
+    }
+
+    @Test
+    public void testFindByCountryCodeAndCityNameNotFound() {
+        String countryCode = "JP";
+        String cityName = "Tokyo";
+        RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByCountryCodeAndCityName(countryCode, cityName);
+        assertNull(realtimeWeather);
+    }
+
+    @Test
+    public void testFindByCountryCodeAndCityNameFound() {
+        String countryCode = "US";
+        String cityName = "New York City";
+        RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByCountryCodeAndCityName(countryCode, cityName);
+        assertNotNull(realtimeWeather);
+        assertEquals(realtimeWeather.getLocation().getCountryCode(), countryCode);
+        assertEquals(realtimeWeather.getLocation().getCityName(), cityName);
     }
 
 }
