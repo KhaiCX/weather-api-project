@@ -2,7 +2,9 @@ package com.weatherforecast.api.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatTypes;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +22,6 @@ public class RealtimeWeatherDTO {
     private Integer windSpeed;
 
     @JsonProperty("last_updated")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime lastUpdated;
 }
