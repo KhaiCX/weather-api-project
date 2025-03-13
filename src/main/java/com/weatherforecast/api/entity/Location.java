@@ -92,7 +92,6 @@ public class Location {
 
     @Override
     public String toString() {
-        return "Location [code=" + code + ", cityName=" + cityName + ", regionName=" + regionName + ", countryCode="
-                + countryCode + ", countryName=" + countryName + ", enabled=" + enabled + ", trashed=" + trashed + "]";
+        return cityName + ", " + (!Objects.isNull(regionName) ? regionName : "") + ", " + countryCode;
     }
 }
