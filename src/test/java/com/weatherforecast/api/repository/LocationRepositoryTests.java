@@ -121,4 +121,26 @@ public class LocationRepositoryTests {
 
         assertNotEquals(updatedLocation.getListHourlyWeather().size(), 0);
     }
+
+    @Test
+    public void testFindByCountryCodeAndCityNameNotFound() {
+        String countryCode = "AB";
+        String cityName = "City";
+
+        Location location = locationRepository.findByCountryCodeAndCityName(countryCode, cityName);
+
+        assertNull(location);
+    }
+
+    @Test
+    public void testFindByCountryCodeAndCityNameFound() {
+        String countryCode = "US";
+        String cityName = "New York City";
+
+        Location location = locationRepository.findByCountryCodeAndCityName(countryCode, cityName);
+
+        assertNotNull(location);
+        assertEquals(location.getCountryCode(), countryCode);
+        assertEquals(location.getCityName(), cityName);
+    }
 }

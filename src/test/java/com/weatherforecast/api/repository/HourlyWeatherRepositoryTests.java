@@ -1,7 +1,10 @@
 package com.weatherforecast.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -49,6 +52,26 @@ public class HourlyWeatherRepositoryTests {
         repository.deleteById(id);
         Optional<HourlyWeather> result = repository.findById(id);
         assertEquals(result.isPresent(), false);
+    }
+
+    @Test
+    public void testFindByLocationCodeFound() {
+        String locationCode = "NYC_USA";
+        Integer currentHour = 10;
+
+        List<HourlyWeather> listHourlyWeather = repository.findByLocationCode(locationCode, currentHour);
+
+        assertFalse(listHourlyWeather.isEmpty());
+    }
+
+    @Test
+    public void testFindByLocationCodeNotFound() {
+        String locationCode = "NYC_USA";
+        Integer currentHour = 25;
+
+        List<HourlyWeather> listHourlyWeather = repository.findByLocationCode(locationCode, currentHour);
+
+        assertTrue(listHourlyWeather.isEmpty());
     }
 
 }
