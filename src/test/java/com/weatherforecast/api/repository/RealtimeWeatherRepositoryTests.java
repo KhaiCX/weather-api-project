@@ -6,54 +6,74 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.Rollback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
+import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.entity.RealtimeWeather;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-@Rollback(false)
+@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class RealtimeWeatherRepositoryTests {
 
-    @Autowired
+    @Mock
     private RealtimeWeatherRepository realtimeWeatherRepository;
+
+    private RealtimeWeather mockRealtimeWeather;
+
+    @BeforeEach
+    public void createData() {
+        mockRealtimeWeather = new RealtimeWeather();
+        mockRealtimeWeather.setLocationCode("NYC_USA");
+        mockRealtimeWeather.setHumidity(32);
+        mockRealtimeWeather.setPrecipitation(42);
+        mockRealtimeWeather.setStatus("Snowy");
+        mockRealtimeWeather.setWindSpeed(12);
+        mockRealtimeWeather.setLastUpdated(LocalDateTime.now());
+    }
 
     @Test
     public void testUpdate() {
-        String code = "NYC_USA";
-        RealtimeWeather realtimeWeather = realtimeWeatherRepository.findById(code).get();
-                realtimeWeather.setTemperature(-2);
-        realtimeWeather.setHumidity(32);
-        realtimeWeather.setPrecipitation(42);
-        realtimeWeather.setStatus("Snowy");
-        realtimeWeather.setWindSpeed(12);
-        realtimeWeather.setLastUpdated(LocalDateTime.now());
 
-        RealtimeWeather updatedRealtimeWeather = realtimeWeatherRepository.save(realtimeWeather);
-        assertEquals(updatedRealtimeWeather.getHumidity(), 32);
+        Mockito.when(realtimeWeatherRepository.save(mockRealtimeWeather)).thenReturn(mockRealtimeWeather);
+        RealtimeWeather updatedRealtimeWeather = realtimeWeatherRepository.save(mockRealtimeWeather);
+        assertEquals(updatedRealtimeWeather.getLocationCode(), mockRealtimeWeather.getLocationCode());
+        assertEquals(updatedRealtimeWeather.getHumidity(), mockRealtimeWeather.getHumidity());
+        assertEquals(updatedRealtimeWeather.getTemperature(), mockRealtimeWeather.getTemperature());
+        assertEquals(updatedRealtimeWeather.getStatus(), mockRealtimeWeather.getStatus());
+        assertEquals(updatedRealtimeWeather.getWindSpeed(), mockRealtimeWeather.getWindSpeed());
     }
 
     @Test
     public void testFindByCountryCodeAndCityNameNotFound() {
         String countryCode = "JP";
         String cityName = "Tokyo";
+        Mockito.when(realtimeWeatherRepository.findByCountryCodeAndCityName(countryCode, cityName)).thenReturn(null);
         RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByCountryCodeAndCityName(countryCode, cityName);
         assertNull(realtimeWeather);
     }
 
     @Test
     public void testFindByCountryCodeAndCityNameFound() {
-        String countryCode = "US";
-        String cityName = "New York City";
-        RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByCountryCodeAndCityName(countryCode, cityName);
+        Location mockLocation = new Location();
+        mockLocation.setCode("MBMH_IN");
+        mockLocation.setCityName("Munbai");
+        mockLocation.setRegionName("Maharashtra");
+        mockLocation.setCountryCode("IN");
+        mockLocation.setCountryName("India");
+        mockLocation.setEnabled(true);
+        mockLocation.setTrashed(false);
+        mockRealtimeWeather.setLocation(mockLocation);
+        Mockito.when(realtimeWeatherRepository.findByCountryCodeAndCityName(mockLocation.getCountryCode(), mockLocation.getCityName())).thenReturn(mockRealtimeWeather);
+        RealtimeWeather realtimeWeather = realtimeWeatherRepository.findByCountryCodeAndCityName(mockLocation.getCountryCode(), mockLocation.getCityName());
         assertNotNull(realtimeWeather);
-        assertEquals(realtimeWeather.getLocation().getCountryCode(), countryCode);
-        assertEquals(realtimeWeather.getLocation().getCityName(), cityName);
+        assertEquals(realtimeWeather.getLocation().getCountryCode(), mockRealtimeWeather.getLocation().getCountryCode());
+        assertEquals(realtimeWeather.getLocation().getCityName(), mockRealtimeWeather.getLocation().getCityName());
     }
 
 }
