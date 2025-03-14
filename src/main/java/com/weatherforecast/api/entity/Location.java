@@ -1,5 +1,7 @@
 package com.weatherforecast.api.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.hibernate.validator.constraints.Length;
@@ -11,6 +13,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -57,6 +60,9 @@ public class Location {
     @PrimaryKeyJoinColumn
     @JsonIgnore
     private RealtimeWeather realtimeWeather;
+
+    @OneToMany(mappedBy = "id.location")
+    private List<HourlyWeather> listHourlyWeather = new ArrayList<>();
 
     private Boolean enabled;
 
