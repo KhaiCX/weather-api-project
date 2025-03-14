@@ -16,7 +16,8 @@ public class GeolocationService {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(GeolocationService.class);
 
     private String DBPath = "ip2localdb/IP2LOCATION-LITE-DB3.BIN";
-    IP2Location ip2Location = new IP2Location();
+
+    private IP2Location ip2Location;
 
     public GeolocationService(IP2Location ip2Location) {
         try {
