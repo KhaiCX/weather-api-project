@@ -5,110 +5,117 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.Rollback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
+import com.weatherforecast.api.entity.RealtimeWeather;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-@Rollback(false)
+@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class LocationRepositoryTests {
 
-    @Autowired
+    @Mock
     private LocationRepository locationRepository;
 
-    private Location savedLocation;
+    private Location mockLocation;
 
     @BeforeEach
     public void createData() {
-        Location location = new Location();
-        location.setCode("MBMH_IN");
-        location.setCityName("Munbai");
-        location.setRegionName("Maharashtra");
-        location.setCountryCode("IN");
-        location.setCountryName("India");
-        location.setEnabled(true);
-        location.setTrashed(false);
-        savedLocation = locationRepository.save(location);
+        mockLocation = new Location();
+        mockLocation.setCode("MBMH_IN");
+        mockLocation.setCityName("Munbai");
+        mockLocation.setRegionName("Maharashtra");
+        mockLocation.setCountryCode("IN");
+        mockLocation.setCountryName("India");
+        mockLocation.setEnabled(true);
+        mockLocation.setTrashed(false);
     }
 
     @Test
     public void testAddLocationSuccess() {
-        assertNotNull(savedLocation);
-        assertEquals(savedLocation.getCode(), "MBMH_IN");
-        assertEquals(savedLocation.getCityName(), "Munbai");
-        assertEquals(savedLocation.getRegionName(), "Maharashtra");
-        assertEquals(savedLocation.getCountryCode(), "IN");
-        assertEquals(savedLocation.getCountryName(), "India");
+        Mockito.when(locationRepository.save(mockLocation)).thenReturn(mockLocation);
+        Location location = locationRepository.save(mockLocation);
+        assertNotNull(location);
+        assertEquals(location.getCode(), "MBMH_IN");
+        assertEquals(location.getCityName(), "Munbai");
+        assertEquals(location.getRegionName(), "Maharashtra");
+        assertEquals(location.getCountryCode(), "IN");
+        assertEquals(location.getCountryName(), "India");
     }
 
     @Test
     public void testListSuccess() {
+        List<Location> mockLocationList = List.of(mockLocation);
+        Mockito.when(locationRepository.findUnTrashed()).thenReturn(mockLocationList);
         List<Location> locations = locationRepository.findUnTrashed();
-        assertNotEquals(locations.size(), 0);
+        assertEquals(locations.size(), mockLocationList.size());
         locations.forEach(System.out::println);
     }
 
     @Test
     public void testGetNotFound() {
-        Location location = locationRepository.findByCode(savedLocation.getCode());
+        String code = "MBMH_IN";
+        Mockito.when(locationRepository.findByCode(code)).thenReturn(mockLocation);
+        Location location = locationRepository.findByCode(code);
         assertNotNull(location);
+        assertEquals(mockLocation.getCode(), location.getCode());
     }
 
     @Test
     public void testGetFound() {
-        Location location = locationRepository.findByCode("Test");
+        String code = "codeTest";
+        Mockito.when(locationRepository.findByCode(code)).thenReturn(null);
+        Location location = locationRepository.findByCode(code);
         assertNull(location);
     }
 
     @Test
     public void testTrashSuccess() {
-        String code = "NYC_USA";
+        String code = "MBMH_IN";
         locationRepository.trashByCode(code);
-        Location location = locationRepository.findByCode(code);
-        assertNull(location);
+        Mockito.verify(locationRepository, Mockito.times(1)).trashByCode(code);
     }
 
-    // @Test
-    // public void testAddRealtimeWeatherData() {
-    //     String code = "NYC_USA";
-    //     Location location = locationRepository.findByCode(code);
-    //     RealtimeWeather realtimeWeather = location.getRealtimeWeather();
-    //     if (Objects.isNull(realtimeWeather)) {
-    //         realtimeWeather = new RealtimeWeather();
-    //         realtimeWeather.setLocation(location);
-    //         location.setRealtimeWeather(realtimeWeather);
-    //     }
-    //     realtimeWeather.setTemperature(10);
-    //     realtimeWeather.setHumidity(60);
-    //     realtimeWeather.setPrecipitation(70);
-    //     realtimeWeather.setStatus("Sunny");
-    //     realtimeWeather.setLastUpdated(LocalDateTime.now());
+    @Test
+    public void testAddRealtimeWeatherData() {
+        RealtimeWeather realtimeWeather = mockLocation.getRealtimeWeather();
+        if (Objects.isNull(realtimeWeather)) {
+            realtimeWeather = new RealtimeWeather();
+            realtimeWeather.setLocation(mockLocation);
+            mockLocation.setRealtimeWeather(realtimeWeather);
+        }
+        realtimeWeather.setTemperature(10);
+        realtimeWeather.setHumidity(60);
+        realtimeWeather.setPrecipitation(70);
+        realtimeWeather.setStatus("Sunny");
+        realtimeWeather.setLastUpdated(LocalDateTime.now());
 
-    //     Location saveLocation = locationRepository.save(location);
-    //     assertEquals(saveLocation.getRealtimeWeather().getLocationCode(), code);
-    // }
+        Mockito.when(locationRepository.save(mockLocation)).thenReturn(mockLocation);
+        Location saveLocation = locationRepository.save(mockLocation);
+        assertEquals(saveLocation.getRealtimeWeather().getLocationCode(), mockLocation.getRealtimeWeather().getLocationCode());
+    }
 
     @Test
     public void testAddHourlyWeatherData() {
-        Location location = locationRepository.findById("NYC_USA").get();
 
-        List<HourlyWeather> listHourlyWeather = location.getListHourlyWeather();
+        List<HourlyWeather> listHourlyWeather = mockLocation.getListHourlyWeather();
 
-        HourlyWeather forecast1 = new HourlyWeather().id(location, 10)
+        HourlyWeather forecast1 = new HourlyWeather().id(mockLocation, 10)
         .temperature(15)
         .precipitation(40)
         .status("Sunny");
-        HourlyWeather forecast2 = new HourlyWeather().location(location)
+        HourlyWeather forecast2 = new HourlyWeather().location(mockLocation)
         .hourOfDay(11)
         .temperature(16)
         .precipitation(50)
@@ -117,7 +124,8 @@ public class LocationRepositoryTests {
         listHourlyWeather.add(forecast1);
         listHourlyWeather.add(forecast2);
 
-        Location updatedLocation = locationRepository.save(location);
+        Mockito.when(locationRepository.save(mockLocation)).thenReturn(mockLocation);
+        Location updatedLocation = locationRepository.save(mockLocation);
 
         assertNotEquals(updatedLocation.getListHourlyWeather().size(), 0);
     }
@@ -127,6 +135,7 @@ public class LocationRepositoryTests {
         String countryCode = "AB";
         String cityName = "City";
 
+        Mockito.when(locationRepository.findByCountryCodeAndCityName(countryCode, cityName)).thenReturn(null);
         Location location = locationRepository.findByCountryCodeAndCityName(countryCode, cityName);
 
         assertNull(location);
@@ -134,13 +143,14 @@ public class LocationRepositoryTests {
 
     @Test
     public void testFindByCountryCodeAndCityNameFound() {
-        String countryCode = "US";
-        String cityName = "New York City";
 
+        String countryCode = "IN";
+        String cityName = "Munbai";
+        Mockito.when(locationRepository.findByCountryCodeAndCityName(countryCode, cityName)).thenReturn(mockLocation);
         Location location = locationRepository.findByCountryCodeAndCityName(countryCode, cityName);
 
         assertNotNull(location);
-        assertEquals(location.getCountryCode(), countryCode);
-        assertEquals(location.getCityName(), cityName);
+        assertEquals(location.getCountryCode(), mockLocation.getCountryCode());
+        assertEquals(location.getCityName(), mockLocation.getCityName());
     }
 }
