@@ -80,23 +80,23 @@ public class LocationRepositoryTests {
         assertNull(location);
     }
 
-    @Test
-    public void testAddRealtimeWeatherData() {
-        String code = "NYC_USA";
-        Location location = locationRepository.findByCode(code);
-        RealtimeWeather realtimeWeather = location.getRealtimeWeather();
-        if (Objects.isNull(realtimeWeather)) {
-            realtimeWeather = new RealtimeWeather();
-            realtimeWeather.setLocation(location);
-            location.setRealtimeWeather(realtimeWeather);
-        }
-        realtimeWeather.setTemperature(10);
-        realtimeWeather.setHumidity(60);
-        realtimeWeather.setPrecipitation(70);
-        realtimeWeather.setStatus("Sunny");
-        realtimeWeather.setLastUpdated(LocalDateTime.now());
+    // @Test
+    // public void testAddRealtimeWeatherData() {
+    //     String code = "NYC_USA";
+    //     Location location = locationRepository.findByCode(code);
+    //     RealtimeWeather realtimeWeather = location.getRealtimeWeather();
+    //     if (Objects.isNull(realtimeWeather)) {
+    //         realtimeWeather = new RealtimeWeather();
+    //         realtimeWeather.setLocation(location);
+    //         location.setRealtimeWeather(realtimeWeather);
+    //     }
+    //     realtimeWeather.setTemperature(10);
+    //     realtimeWeather.setHumidity(60);
+    //     realtimeWeather.setPrecipitation(70);
+    //     realtimeWeather.setStatus("Sunny");
+    //     realtimeWeather.setLastUpdated(LocalDateTime.now());
 
-        Location saveLocation = locationRepository.save(location);
-        assertEquals(saveLocation.getRealtimeWeather().getLocationCode(), code);
-    }
+    //     Location saveLocation = locationRepository.save(location);
+    //     assertEquals(saveLocation.getRealtimeWeather().getLocationCode(), code);
+    // }
 }

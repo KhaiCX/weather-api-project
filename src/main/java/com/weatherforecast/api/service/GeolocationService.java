@@ -1,9 +1,6 @@
 package com.weatherforecast.api.service;
 
 import java.io.IOException;
-import java.util.logging.Logger;
-
-import javax.imageio.IIOException;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
