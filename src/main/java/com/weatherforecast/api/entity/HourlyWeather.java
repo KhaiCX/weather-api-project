@@ -23,4 +23,35 @@ public class HourlyWeather {
     @Column(length = 50)
     private String status;
 
+    public HourlyWeather temperature(Integer temp) {
+        setTemperature(temp);
+        return this;
+    }
+
+    public HourlyWeather id(Location location, Integer hour) {
+        this.id.setLocation(location);
+        this.id.setHourOfDay(hour);
+        return this;
+    }
+
+    public HourlyWeather precipitation(Integer precipitation) {
+        setPrecipitation(precipitation);
+        return this;
+    }
+
+    public HourlyWeather status(String status) {
+        setStatus(status);
+        return this;
+    }
+
+    public HourlyWeather location(Location location) {
+        this.id.setLocation(location);
+        return this;
+    }
+
+    public HourlyWeather hourOfDay(Integer hour) {
+        this.id.setHourOfDay(hour);
+        return this;
+    }
+
 }

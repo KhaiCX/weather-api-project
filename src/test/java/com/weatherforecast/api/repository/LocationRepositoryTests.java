@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +15,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.Rollback;
 
+import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
-import com.weatherforecast.api.entity.RealtimeWeather;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -33,11 +31,11 @@ public class LocationRepositoryTests {
     @BeforeEach
     public void createData() {
         Location location = new Location();
-        location.setCode("NYC_USA");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
+        location.setCode("MBMH_IN");
+        location.setCityName("Munbai");
+        location.setRegionName("Maharashtra");
+        location.setCountryCode("IN");
+        location.setCountryName("India");
         location.setEnabled(true);
         location.setTrashed(false);
         savedLocation = locationRepository.save(location);
@@ -46,11 +44,11 @@ public class LocationRepositoryTests {
     @Test
     public void testAddLocationSuccess() {
         assertNotNull(savedLocation);
-        assertEquals(savedLocation.getCode(), "NYC_USA");
-        assertEquals(savedLocation.getCityName(), "New York City");
-        assertEquals(savedLocation.getRegionName(), "New York");
-        assertEquals(savedLocation.getCountryCode(), "US");
-        assertEquals(savedLocation.getCountryName(), "United States of America");
+        assertEquals(savedLocation.getCode(), "MBMH_IN");
+        assertEquals(savedLocation.getCityName(), "Munbai");
+        assertEquals(savedLocation.getRegionName(), "Maharashtra");
+        assertEquals(savedLocation.getCountryCode(), "IN");
+        assertEquals(savedLocation.getCountryName(), "India");
     }
 
     @Test
@@ -99,4 +97,28 @@ public class LocationRepositoryTests {
     //     Location saveLocation = locationRepository.save(location);
     //     assertEquals(saveLocation.getRealtimeWeather().getLocationCode(), code);
     // }
+
+    @Test
+    public void testAddHourlyWeatherData() {
+        Location location = locationRepository.findById("NYC_USA").get();
+
+        List<HourlyWeather> listHourlyWeather = location.getListHourlyWeather();
+
+        HourlyWeather forecast1 = new HourlyWeather().id(location, 10)
+        .temperature(15)
+        .precipitation(40)
+        .status("Sunny");
+        HourlyWeather forecast2 = new HourlyWeather().location(location)
+        .hourOfDay(11)
+        .temperature(16)
+        .precipitation(50)
+        .status("Cloudy");
+
+        listHourlyWeather.add(forecast1);
+        listHourlyWeather.add(forecast2);
+
+        Location updatedLocation = locationRepository.save(location);
+
+        assertNotEquals(updatedLocation.getListHourlyWeather().size(), 0);
+    }
 }
