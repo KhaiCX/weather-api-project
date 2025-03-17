@@ -23,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.weatherforecast.api.dto.ErrorDTO;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -54,6 +55,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
         List<String> errors = new ArrayList<>();
         errors.add(exception.getMessage());
+        errorDTO.setErrors(errors);
+        errorDTO.setPath(request.getServletPath());
+
+        LOGGER.error(exception.getMessage(), exception);
+
+        return errorDTO;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDTO handleConstrainViolationException(HttpServletRequest request, Exception exception) {
+        ConstraintViolationException violationException = (ConstraintViolationException) exception;
+        var violationExceptions = violationException.getConstraintViolations();
+
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
+        
+        List<String> errors = new ArrayList<>();
+        violationExceptions.forEach(constraint -> {
+            errors.add(constraint.getPropertyPath() + ": " + exception.getMessage());
+        });
         errorDTO.setErrors(errors);
         errorDTO.setPath(request.getServletPath());
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,9 +25,11 @@ import com.weatherforecast.api.service.GeolocationService;
 import com.weatherforecast.api.service.HourlyWeatherService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/hourly")
+@Validated
 public class HourlyWeatherController {
     private GeolocationService geolocationService;
     private HourlyWeatherService hourlyWeatherService;
@@ -84,11 +87,27 @@ public class HourlyWeatherController {
     }
 
     @PutMapping("/{locationCode}")
-    public ResponseEntity<?> updateHourlyForecast(@PathVariable String locationCode, @RequestBody List<HourlyWeatherDTO> listDTO) throws BadRequestException {
+    public ResponseEntity<?> updateHourlyForecast(@PathVariable String locationCode, @RequestBody @Valid List<HourlyWeatherDTO> listDTO) throws BadRequestException {
         if (listDTO.isEmpty()) {
             throw new BadRequestException("Hourly forecast data cannot be empty");
         }
-        return ResponseEntity.accepted().build();
+        List<HourlyWeather> listHourlyWeather = listDTO2ListEntity(listDTO);
+        listDTO.forEach(System.out::println);
+        listHourlyWeather.forEach(System.out::println);
+        try {
+            List<HourlyWeather> updateHourlyWeather = hourlyWeatherService.updateByLocationCode(locationCode, listHourlyWeather);
+            return ResponseEntity.ok().body(listEntity2DTO(updateHourlyWeather));
+        } catch (LocationNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private List<HourlyWeather> listDTO2ListEntity(List<HourlyWeatherDTO> listDTO) {
+        List<HourlyWeather> listEntity = new ArrayList<>();
+        listDTO.forEach(dto -> {
+            listEntity.add(modelMapper.map(dto, HourlyWeather.class));
+        });
+        return listEntity;
     }
 
     private HourlyWeatherListDTO listEntity2DTO(List<HourlyWeather> hourlyForecast) {

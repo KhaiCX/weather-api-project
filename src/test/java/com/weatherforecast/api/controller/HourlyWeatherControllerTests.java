@@ -2,6 +2,7 @@ package com.weatherforecast.api.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -191,6 +192,48 @@ public class HourlyWeatherControllerTests {
         mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors[0]", is("Hourly forecast data cannot be empty")))
+        .andDo(print());
+    }
+
+    @Test
+    public void testUpdateShouldReturn400BadRequestBecauseInvalidData() throws Exception {
+        String requestUrl = END_POINT_PATH + "/NYC_USA";
+
+        HourlyWeatherDTO dto1 = new HourlyWeatherDTO()
+        .hourOfDay(10)
+        .temperature(13)
+        .precipitation(700)
+        .status("Cloudy");
+
+        HourlyWeatherDTO dto2 = new HourlyWeatherDTO()
+        .hourOfDay(-1)
+        .temperature(15)
+        .precipitation(60)
+        .status("");
+
+        String requestBody = objectMapper.writeValueAsString(List.of(dto1, dto2));
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0]", containsString("Precipitation must be in the range of 0 to 100 percentage")))
+        .andDo(print());
+    }
+
+    @Test
+    public void testUpdateShouldReturn404NotFound() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
+
+        HourlyWeatherDTO dto1 = new HourlyWeatherDTO()
+        .hourOfDay(10)
+        .temperature(13)
+        .precipitation(70)
+        .status("Cloudy");
+
+        List<HourlyWeatherDTO> listDTO = List.of(dto1);
+        String requestBody = objectMapper.writeValueAsString(listDTO);
+        when(hourlyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenThrow(LocationNotFoundException.class);
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isNotFound())
         .andDo(print());
     }
 }

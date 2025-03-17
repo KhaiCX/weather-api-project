@@ -45,7 +45,12 @@ public class HourlyWeatherService {
         return repository.findByLocationCode(locationCode, currentHour);
     }
 
-    public List<HourlyWeather> updateByLocationCode(String locationCode, List<HourlyWeather> hourlyForecastInRequest) {
+    public List<HourlyWeather> updateByLocationCode(String locationCode, List<HourlyWeather> hourlyForecastInRequest) throws LocationNotFoundException {
+        Location location = locationRepository.findByCode(locationCode);
+
+        if (Objects.isNull(location)) {
+            throw new LocationNotFoundException("No location not found with given code: " + locationCode);
+        }
         return Collections.emptyList();
     }
 

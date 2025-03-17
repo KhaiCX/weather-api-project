@@ -1,5 +1,7 @@
 package com.weatherforecast.api;
 
+import java.util.Objects;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.SpringApplication;
@@ -17,8 +19,12 @@ public class WeatherApiProjectApplication {
 	public ModelMapper getModelMapper() {
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-		var typeMap = modelMapper.typeMap(HourlyWeather.class, HourlyWeatherDTO.class);
-		typeMap.addMapping(src -> src.getId().getHourOfDay(), HourlyWeatherDTO::setHourOfDay);
+		var typeMap1 = modelMapper.typeMap(HourlyWeather.class, HourlyWeatherDTO.class);
+		typeMap1.addMapping(src -> src.getId().getHourOfDay(), HourlyWeatherDTO::setHourOfDay);
+
+		var typeMap2 = modelMapper.typeMap(HourlyWeatherDTO.class, HourlyWeather.class);
+		typeMap2.addMapping(src -> src.getHourOfDay(),
+		(dest, value) -> {dest.getId().setHourOfDay(!Objects.isNull(value) ? (Integer) value : 0);});
 		return modelMapper;
 	}
 
