@@ -7,6 +7,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +17,7 @@ import com.weatherforecast.api.dto.HourlyWeatherDTO;
 import com.weatherforecast.api.dto.HourlyWeatherListDTO;
 import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
+import com.weatherforecast.api.exception.BadRequestException;
 import com.weatherforecast.api.exception.GeolocationException;
 import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.GeolocationService;
@@ -78,6 +81,14 @@ public class HourlyWeatherController {
         } catch (LocationNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping("/{locationCode}")
+    public ResponseEntity<?> updateHourlyForecast(@PathVariable String locationCode, @RequestBody List<HourlyWeatherDTO> listDTO) throws BadRequestException {
+        if (listDTO.isEmpty()) {
+            throw new BadRequestException("Hourly forecast data cannot be empty");
+        }
+        return ResponseEntity.accepted().build();
     }
 
     private HourlyWeatherListDTO listEntity2DTO(List<HourlyWeather> hourlyForecast) {

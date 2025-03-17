@@ -1,5 +1,6 @@
 package com.weatherforecast.api.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,6 +43,10 @@ public class HourlyWeatherService {
         }
         
         return repository.findByLocationCode(locationCode, currentHour);
+    }
+
+    public List<HourlyWeather> updateByLocationCode(String locationCode, List<HourlyWeather> hourlyForecastInRequest) {
+        return Collections.emptyList();
     }
 
 }

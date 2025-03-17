@@ -3,6 +3,7 @@ package com.weatherforecast.api.controller;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,7 +21,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weatherforecast.api.config.TestConfig;
+import com.weatherforecast.api.dto.HourlyWeatherDTO;
 import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.GeolocationException;
@@ -36,6 +39,8 @@ public class HourlyWeatherControllerTests {
     private static final String X_CURRENT_HOUR = "X-Current-Hour";
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private GeolocationService geolocationService;
     @Autowired
@@ -175,6 +180,17 @@ public class HourlyWeatherControllerTests {
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$.location", is(location.toString())))
         .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
+        .andDo(print());
+    }
+
+    @Test
+    public void testUpdateShouldReturn400BadRequestBecauseNoData() throws Exception {
+        String requestUrl = END_POINT_PATH + "/NYC_USA";
+        List<HourlyWeatherDTO> listDTO = Collections.emptyList();
+        String requestBody = objectMapper.writeValueAsString(listDTO);
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0]", is("Hourly forecast data cannot be empty")))
         .andDo(print());
     }
 }
