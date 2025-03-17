@@ -236,4 +236,54 @@ public class HourlyWeatherControllerTests {
         .andExpect(status().isNotFound())
         .andDo(print());
     }
+
+    @Test
+    public void testUpdateShouldReturn200OK() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
+
+        HourlyWeatherDTO dto1 = new HourlyWeatherDTO()
+        .hourOfDay(10)
+        .temperature(13)
+        .precipitation(70)
+        .status("Cloudy");
+
+        HourlyWeatherDTO dto2 = new HourlyWeatherDTO()
+        .hourOfDay(11)
+        .temperature(15)
+        .precipitation(60)
+        .status("Sunny");
+
+        Location location = new Location();
+        location.setCode(locationCode);
+        location.setCityName("New York City");
+        location.setCityName("New York");
+        location.setCountryCode("US");
+        location.setCountryName("United States of America");
+
+        HourlyWeather forecast1 = new HourlyWeather()
+        .location(location)
+        .hourOfDay(10)
+        .temperature(13)
+        .precipitation(17)
+        .status("Cloudy");
+
+        HourlyWeather forecast2 = new HourlyWeather()
+        .location(location)
+        .hourOfDay(11)
+        .temperature(15)
+        .precipitation(60)
+        .status("Sunny");
+        List<HourlyWeatherDTO> listDTO = List.of(dto1, dto2);
+
+        List<HourlyWeather> listHourlyWeather = List.of(forecast1, forecast2);
+
+        when(hourlyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenReturn(listHourlyWeather);
+
+        String requestBody = objectMapper.writeValueAsString(listDTO);
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
+        .andDo(print());
+    }
 }

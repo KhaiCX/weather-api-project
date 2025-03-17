@@ -1,5 +1,7 @@
 package com.weatherforecast.api.entity;
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -57,6 +59,29 @@ public class HourlyWeather {
     @Override
     public String toString() {
         return "HourlyWeather [hourOfDay=" + id.getHourOfDay() + ", temperature=" + temperature + ", precipitation=" + precipitation + ", status=" + status + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        HourlyWeather other = (HourlyWeather) obj;
+        return Objects.equals(id, other.id);
+    }
+
+    public HourlyWeather getShallowCopy() {
+        HourlyWeather copy = new HourlyWeather();
+        copy.setId(this.getId());
+        return copy;
     }
 
 }

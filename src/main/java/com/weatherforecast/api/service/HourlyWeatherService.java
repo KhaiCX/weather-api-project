@@ -1,5 +1,6 @@
 package com.weatherforecast.api.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +52,25 @@ public class HourlyWeatherService {
         if (Objects.isNull(location)) {
             throw new LocationNotFoundException("No location not found with given code: " + locationCode);
         }
-        return Collections.emptyList();
+
+        for (HourlyWeather item: hourlyForecastInRequest) {
+            item.getId().setLocation(location);
+        }
+
+        List<HourlyWeather> hourlyWeatherInDB = location.getListHourlyWeather();
+        List<HourlyWeather> hourlyWeatherToBeRemoved = new ArrayList<>();
+
+        for (HourlyWeather item: hourlyForecastInRequest) {
+            if (!hourlyForecastInRequest.contains(item)) {
+                hourlyWeatherToBeRemoved.add(item.getShallowCopy());
+            }
+        }
+
+        for (HourlyWeather item: hourlyWeatherToBeRemoved) {
+            hourlyWeatherInDB.remove(item);
+        }
+
+        return (List<HourlyWeather>) repository.saveAll(hourlyForecastInRequest);
     }
 
 }
