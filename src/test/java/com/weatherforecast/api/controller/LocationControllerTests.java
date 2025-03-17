@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weatherforecast.api.config.TestConfig;
+import com.weatherforecast.api.dto.LocationDTO;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.LocationService;
@@ -46,6 +47,7 @@ public class LocationControllerTests {
 
     private Location location1;
     private Location location2;
+    private LocationDTO dto;
 
     @BeforeEach
     public void createData() {
@@ -65,6 +67,14 @@ public class LocationControllerTests {
         location2.setCountryName("United States of Los Angerles");
         location2.setEnabled(true);
         location2.setTrashed(true);
+
+        dto = new LocationDTO();
+        dto.setCode(location1.getCode());
+        dto.setCityName(location1.getCityName());
+        dto.setCountryCode(location1.getCountryCode());
+        dto.setCountryName(location1.getCountryName());
+        dto.setRegionName(location1.getRegionName());
+        dto.setEnabled(location1.getEnabled());
     }
     
     @Test
@@ -81,7 +91,7 @@ public class LocationControllerTests {
 
         Mockito.when(locationService.add(location1)).thenReturn(location1);
 
-        String bodyContent = objectMapper.writeValueAsString(location1);
+        String bodyContent = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
         .andExpect(status().isCreated())
@@ -140,17 +150,9 @@ public class LocationControllerTests {
 
     @Test
     public void testUpdateShouldReturn404NotFound() throws Exception {
-        Location location = new Location();
-        location.setCode("codeTest");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
-        location.setEnabled(true);
+        Mockito.when(locationService.update(Mockito.any())).thenThrow(new LocationNotFoundException("No location found"));
 
-        Mockito.when(locationService.update(location)).thenThrow(new LocationNotFoundException("No location found"));
-
-        String bodyContent = objectMapper.writeValueAsString(location);
+        String bodyContent = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(END_POINT_PATH)
         .contentType("application/json").content(bodyContent))
@@ -160,16 +162,8 @@ public class LocationControllerTests {
 
     @Test
     public void testUpdateShouldReturn400BadRequest() throws Exception {
-        Location location = new Location();
-        //location.setCode("codeTest");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
-        location.setEnabled(true);
 
-        Mockito.when(locationService.update(location)).thenThrow(new LocationNotFoundException("No location found"));
-
+        LocationDTO location = new LocationDTO();
         String bodyContent = objectMapper.writeValueAsString(location);
 
         mockMvc.perform(put(END_POINT_PATH)
@@ -180,25 +174,17 @@ public class LocationControllerTests {
 
     @Test
     public void testUpdateShouldReturn200OK() throws Exception {
-        Location location = new Location();
-        location.setCode("NYC_USA");
-        location.setCityName("New York City Test");
-        location.setRegionName("New York Test");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America Test");
-        location.setEnabled(true);
 
-        Mockito.when(locationService.update(location)).thenReturn(location);
-
-        String bodyContent = objectMapper.writeValueAsString(location);
+        Mockito.when(locationService.update(location1)).thenReturn(location1);
+        String bodyContent = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(END_POINT_PATH)
         .contentType("application/json").content(bodyContent))
         .andExpect(status().isOk())
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$.code", is("NYC_USA")))
-        .andExpect(jsonPath("$.city_name", is("New York City Test")))
-        .andExpect(jsonPath("$.region_name", is("New York Test")))
+        .andExpect(jsonPath("$.city_name", is("New York City")))
+        .andExpect(jsonPath("$.region_name", is("New York")))
         .andExpect(jsonPath("$.country_code", is("US")))
         .andDo(print());
     }
@@ -230,16 +216,8 @@ public class LocationControllerTests {
 
     @Test
     public void testValidateRequestBodyLocationCode() throws Exception {
-
-        Location location = new Location();
-        //location.setCode("NYC_USA");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
-        location.setEnabled(true);
-        
-        String bodyContent = objectMapper.writeValueAsString(location);
+        dto.setCode(null);
+        String bodyContent = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
         .andExpect(status().isBadRequest())
@@ -252,20 +230,13 @@ public class LocationControllerTests {
     @Test
     public void testValidateRequestBodyLocationCodeLength() throws Exception {
 
-        Location location = new Location();
-        location.setCode("");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
-        location.setEnabled(true);
-        
-        String bodyContent = objectMapper.writeValueAsString(location);
+        dto.setCode("NYC_USAAAAAAAAAAAAAAA");
+        String bodyContent = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post(END_POINT_PATH).contentType("application/json").content(bodyContent))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType("application/json"))
-        .andExpect(jsonPath("$.errors[0]", is("Location code must have a length between 3 and 12")))
+        .andExpect(jsonPath("$.errors[0]", is("Location code must have 3-12 characters")))
         .andDo(print());
 
     }
