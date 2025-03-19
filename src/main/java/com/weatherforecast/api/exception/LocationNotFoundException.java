@@ -1,9 +1,9 @@
 package com.weatherforecast.api.exception;
 
-public class LocationNotFoundException extends Exception {
+public class LocationNotFoundException extends RuntimeException {
     
-    public LocationNotFoundException(String message) {
-        super(message);
+    public LocationNotFoundException(String locationCode) {
+        super("Location not found with the given code: " + locationCode);
     }
 
 }

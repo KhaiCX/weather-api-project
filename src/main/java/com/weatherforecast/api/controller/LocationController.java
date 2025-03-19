@@ -2,7 +2,6 @@ package com.weatherforecast.api.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.weatherforecast.api.dto.LocationDTO;
 import com.weatherforecast.api.entity.Location;
-import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.LocationService;
 
 import jakarta.validation.Valid;
@@ -53,29 +51,22 @@ public class LocationController {
     @GetMapping("/{code}")
     public ResponseEntity<?> getLocation(@PathVariable String code) {
         Location location = locationService.get(code);
-        return Objects.isNull(location)
-        ? ResponseEntity.notFound().build()
-        : ResponseEntity.ok().body(location);
+
+        return ResponseEntity.ok().body(entity2DTO(location));
     }
 
     @PutMapping
     public ResponseEntity<?> updateLocation(@RequestBody @Valid LocationDTO dto) {
-        try {
-            Location updateLocation = locationService.update(dto2Entity(dto));
-            return ResponseEntity.ok().body(entity2DTO(updateLocation));
-        } catch (LocationNotFoundException exception) {
-            return ResponseEntity.notFound().build();
-        }
+        Location updateLocation = locationService.update(dto2Entity(dto));
+
+        return ResponseEntity.ok().body(entity2DTO(updateLocation));
     }
 
     @DeleteMapping("/{code}")
     public ResponseEntity<?> deleteLocation(@PathVariable String code) {
-        try {
-            locationService.delete(code);
-            return ResponseEntity.noContent().build();
-        } catch (LocationNotFoundException exception) {
-            return ResponseEntity.notFound().build();
-        }
+        locationService.delete(code);
+
+        return ResponseEntity.noContent().build();
     }
 
     private List<LocationDTO> listEntity2ListDTO(List<Location> listEntity) {

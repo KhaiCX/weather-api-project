@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest(LocationController.class)
 @Import(TestConfig.class)
@@ -132,7 +133,10 @@ public class LocationControllerTests {
 
     @Test
     public void testGetShouldReturn404NotFound() throws Exception {
-        String requestUrl = END_POINT_PATH + "/codeTest";
+        String code = "codeTest";
+        String requestUrl = END_POINT_PATH + "/" + code;
+        LocationNotFoundException exception = new LocationNotFoundException(code);
+        when(locationService.get(code)).thenThrow(exception);
         mockMvc.perform(get(requestUrl))
         .andExpect(status().isNotFound())
         .andDo(print());
@@ -150,13 +154,16 @@ public class LocationControllerTests {
 
     @Test
     public void testUpdateShouldReturn404NotFound() throws Exception {
-        Mockito.when(locationService.update(Mockito.any())).thenThrow(new LocationNotFoundException("No location found"));
+        LocationNotFoundException exception = new LocationNotFoundException(dto.getCode());
+
+        Mockito.when(locationService.update(Mockito.any())).thenThrow(exception);
 
         String bodyContent = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(put(END_POINT_PATH)
         .contentType("application/json").content(bodyContent))
         .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.errors[0]", is(exception.getMessage())))
         .andDo(print());
     }
 
@@ -195,10 +202,12 @@ public class LocationControllerTests {
         String code = "codeTest";
         String requestUrl = END_POINT_PATH + "/" + code;
 
-        Mockito.doThrow(LocationNotFoundException.class).when(locationService).delete(code);
+        LocationNotFoundException exception = new LocationNotFoundException(code);
+        Mockito.doThrow(exception).when(locationService).delete(code);
 
         mockMvc.perform(delete(requestUrl))
         .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.errors[0]", is(exception.getMessage())))
         .andDo(print());
     }
 

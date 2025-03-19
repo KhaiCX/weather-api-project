@@ -86,6 +86,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return errorDTO;
     }
 
+    @ExceptionHandler(LocationNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDTO handleLocationNotFoundException(HttpServletRequest request, Exception exception) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setStatus(HttpStatus.NOT_FOUND.value());
+        
+        List<String> errors = new ArrayList<>();
+        errors.add(exception.getMessage());
+        errorDTO.setErrors(errors);
+        errorDTO.setPath(request.getServletPath());
+
+        LOGGER.error(exception.getMessage(), exception);
+
+        return errorDTO;
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
