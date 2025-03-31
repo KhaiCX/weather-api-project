@@ -4,6 +4,7 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.weatherforecast.api.service.DailyWeatherService;
 import com.weatherforecast.api.service.GeolocationService;
 import com.weatherforecast.api.service.HourlyWeatherService;
 import com.weatherforecast.api.service.LocationService;
@@ -30,5 +31,10 @@ public class TestConfig {
     @Bean
     public HourlyWeatherService hourlyWeatherService() {
         return Mockito.mock(HourlyWeatherService.class);
+    }
+
+    @Bean
+    public DailyWeatherService dailyWeatherService() {
+        return Mockito.mock(DailyWeatherService.class);
     }
 }

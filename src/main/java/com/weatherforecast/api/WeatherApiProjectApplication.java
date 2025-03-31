@@ -9,7 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import com.ip2location.IP2Location;
+import com.weatherforecast.api.dto.DailyWeatherDTO;
 import com.weatherforecast.api.dto.HourlyWeatherDTO;
+import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.HourlyWeather;
 
 @SpringBootApplication
@@ -25,6 +27,11 @@ public class WeatherApiProjectApplication {
 		var typeMap2 = modelMapper.typeMap(HourlyWeatherDTO.class, HourlyWeather.class);
 		typeMap2.addMapping(src -> src.getHourOfDay(),
 		(dest, value) -> {dest.getId().setHourOfDay(!Objects.isNull(value) ? (Integer) value : 0);});
+
+		var typeMap3 = modelMapper.typeMap(DailyWeather.class, DailyWeatherDTO.class);
+		typeMap3.addMapping(src -> src.getId().getDayOfMonth(), DailyWeatherDTO::setDayOfMonth);
+		typeMap3.addMapping(src -> src.getId().getMonth(), DailyWeatherDTO::setMonth);
+
 		return modelMapper;
 	}
 

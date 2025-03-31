@@ -2,6 +2,9 @@ package com.weatherforecast.api.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -40,12 +43,28 @@ public class DailyWeatherRepositoryTests {
         assertEquals(addForecast.getId().getLocation().getCode(), locationCode);
     }
 
-        @Test
+    @Test
     public void testDelete() {
         String locationCode = "DELHI_IN";
         Location location = new Location().code(locationCode);
         DailyWeatherId id = new DailyWeatherId(16, 7, location);
         repository.deleteById(id);
         Mockito.verify(repository, Mockito.times(1)).deleteById(id);
+    }
+
+    @Test
+    public void testFindByLocationCodeFound() {
+        String locationCode = "DELHI_IN";
+        Mockito.when(repository.findByLocationCode(locationCode)).thenReturn(List.of(new DailyWeather()));
+        List<DailyWeather> dailyWeather = repository.findByLocationCode(locationCode);
+        assertEquals(dailyWeather.size(), 1);
+    }
+
+    @Test
+    public void testFindByLocationCodeNotFound() {
+        String locationCode = "DELHI_IN";
+        Mockito.when(repository.findByLocationCode(locationCode)).thenReturn(Collections.emptyList());
+        List<DailyWeather> dailyWeather = repository.findByLocationCode(locationCode);
+        assertEquals(dailyWeather.size(), 0);
     }
 }
