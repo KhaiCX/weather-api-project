@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weatherforecast.api.config.TestConfig;
+import com.weatherforecast.api.dto.RealtimeWeatherDTO;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.entity.RealtimeWeather;
 import com.weatherforecast.api.exception.GeolocationException;
@@ -148,15 +149,15 @@ public class RealtimeWeatherControllerTests {
         String locationCode = "US";
         String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-        RealtimeWeather realtimeWeather = new RealtimeWeather();
-        realtimeWeather.setTemperature(120);
-        realtimeWeather.setHumidity(132);
-        realtimeWeather.setPrecipitation(188);
-        realtimeWeather.setWindSpeed(500);
-        realtimeWeather.setStatus("Cloudy");
-        realtimeWeather.setLastUpdated(LocalDateTime.now());
+        RealtimeWeatherDTO dto = new RealtimeWeatherDTO();
+        dto.setTemperature(120);
+        dto.setHumidity(132);
+        dto.setPrecipitation(188);
+        dto.setWindSpeed(500);
+        dto.setStatus("Cloudy");
+        dto.setLastUpdated(LocalDateTime.now());
 
-        String bodyContent = objectMapper.writeValueAsString(realtimeWeather);
+        String bodyContent = objectMapper.writeValueAsString(dto);
         mockMvc.perform(put(requestUrl).contentType("application/json").content(bodyContent))
         .andExpect(status().isBadRequest())
         .andDo(print());
@@ -167,18 +168,17 @@ public class RealtimeWeatherControllerTests {
         String locationCode = "US";
         String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-        RealtimeWeather realtimeWeather = new RealtimeWeather();
-        realtimeWeather.setLocationCode(locationCode);
-        realtimeWeather.setTemperature(20);
-        realtimeWeather.setHumidity(32);
-        realtimeWeather.setPrecipitation(88);
-        realtimeWeather.setWindSpeed(5);
-        realtimeWeather.setStatus("Cloudy");
-        realtimeWeather.setLastUpdated(LocalDateTime.now());
+        RealtimeWeatherDTO dto = new RealtimeWeatherDTO();
+        dto.setTemperature(20);
+        dto.setHumidity(32);
+        dto.setPrecipitation(88);
+        dto.setWindSpeed(5);
+        dto.setStatus("Cloudy");
+        dto.setLastUpdated(LocalDateTime.now());
 
-        Mockito.when(realtimeWeatherService.update(locationCode, realtimeWeather)).thenThrow(LocationNotFoundException.class);
+        Mockito.when(realtimeWeatherService.update(Mockito.eq(locationCode), Mockito.any())).thenThrow(LocationNotFoundException.class);
 
-        String bodyContent = objectMapper.writeValueAsString(realtimeWeather);
+        String bodyContent = objectMapper.writeValueAsString(dto);
         mockMvc.perform(put(requestUrl).contentType("application/json").content(bodyContent))
         .andExpect(status().isNotFound())
         .andDo(print());
@@ -208,9 +208,17 @@ public class RealtimeWeatherControllerTests {
         realtimeWeather.setLocation(location);
         location.setRealtimeWeather(realtimeWeather);
 
+        RealtimeWeatherDTO dto = new RealtimeWeatherDTO();
+        dto.setTemperature(12);
+        dto.setHumidity(32);
+        dto.setPrecipitation(88);
+        dto.setWindSpeed(5);
+        dto.setStatus("Cloudy");
+        dto.setLastUpdated(LocalDateTime.now());
+
         Mockito.when(realtimeWeatherService.update(code, realtimeWeather)).thenReturn(realtimeWeather);
 
-        String bodyContent = objectMapper.writeValueAsString(realtimeWeather);
+        String bodyContent = objectMapper.writeValueAsString(dto);
 
         String expectedLocation = location.getCityName() + ", " + location.getRegionName() + ", " + location.getCountryCode();
 

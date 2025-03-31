@@ -33,23 +33,15 @@ public class RealtimeWeather {
     @Column(name = "location_code")
     @JsonIgnore
     private String locationCode;
-
-    @Range(min = -50, max = 50, message = "Temperator must be in the range of -50 to 50 Celsius degree")
     private Integer temperature;
-
-    @Range(min = 0, max = 100, message = "Humidity must be in the range of 0 to 100 percentage")
     private Integer humidity;
 
     @JsonProperty("wind_speed")
     @Range(min = 0, max = 200, message = "Wind speed must be in the range of 0 to 200 km/h")
     private Integer windSpeed;
-
-    @Range(min = 0, max = 100, message = "Precipitation must be in the range of 0 to 100 percentage")
     private Integer precipitation;
 
     @Column(length = 50)
-    @NotBlank(message = "Status must be not empty")
-    @Length(min = 3, max = 50, message = "Status must be in between 3-50 characters")
     private String status;
 
     @JsonProperty("last_updated")
