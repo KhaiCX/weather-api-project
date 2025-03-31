@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.entity.RealtimeWeather;
@@ -152,5 +153,34 @@ public class LocationRepositoryTests {
         assertNotNull(location);
         assertEquals(location.getCountryCode(), mockLocation.getCountryCode());
         assertEquals(location.getCityName(), mockLocation.getCityName());
+    }
+
+    @Test
+    public void testAddDailyWeatherData() {
+        List<DailyWeather> listDailyWeathers = mockLocation.getListDailyWeathers();
+        DailyWeather forecast1 = new DailyWeather()
+        .location(mockLocation)
+        .dayOfMonth(16)
+        .month(7)
+        .minTemp(25)
+        .maxTemp(33)
+        .precipitation(20)
+        .status("Sunny");
+
+        DailyWeather forecast2 = new DailyWeather()
+        .location(mockLocation)
+        .dayOfMonth(17)
+        .month(7)
+        .minTemp(26)
+        .maxTemp(34)
+        .precipitation(10)
+        .status("Clear");
+
+        listDailyWeathers.add(forecast1);
+        listDailyWeathers.add(forecast2);
+
+        Mockito.when(locationRepository.save(mockLocation)).thenReturn(mockLocation);
+        Location updatedLocation = locationRepository.save(mockLocation);
+        assertEquals(updatedLocation.getListDailyWeathers().size(), mockLocation.getListDailyWeathers().size());
     }
 }

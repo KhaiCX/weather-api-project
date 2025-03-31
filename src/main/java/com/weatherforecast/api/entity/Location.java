@@ -55,6 +55,9 @@ public class Location {
     @JsonIgnore
     private Boolean trashed;
 
+    @OneToMany(mappedBy = "id.location", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DailyWeather> listDailyWeathers = new ArrayList<>();
+
     public Location(String cityName, String regionName, String countryCode, String countryName) {
         this.cityName = cityName;
         this.regionName = regionName;
