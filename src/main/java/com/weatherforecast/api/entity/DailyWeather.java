@@ -1,5 +1,7 @@
 package com.weatherforecast.api.entity;
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -58,5 +60,35 @@ public class DailyWeather {
     public DailyWeather maxTemp(Integer maxTemp) {
         this.setMaxTemp(maxTemp);
         return this;
+    }
+
+    public DailyWeather getShallowCopy() {
+        DailyWeather copy = new DailyWeather();
+        copy.setId(this.getId());
+
+        return copy;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DailyWeather other = (DailyWeather) obj;
+        return Objects.equals(id, other.id);
+    }
+
+    @Override
+    public String toString() {
+        return "DailyWeather [id=" + id + ", minTemp=" + minTemp + ", maxTemp=" + maxTemp + ", precipitation="
+                + precipitation + ", status=" + status + "]";
     }
 }

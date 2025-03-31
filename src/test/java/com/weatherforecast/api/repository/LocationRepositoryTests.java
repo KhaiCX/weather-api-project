@@ -157,7 +157,7 @@ public class LocationRepositoryTests {
 
     @Test
     public void testAddDailyWeatherData() {
-        List<DailyWeather> listDailyWeathers = mockLocation.getListDailyWeathers();
+        List<DailyWeather> listDailyWeathers = mockLocation.getListDailyWeather();
         DailyWeather forecast1 = new DailyWeather()
         .location(mockLocation)
         .dayOfMonth(16)
@@ -181,6 +181,6 @@ public class LocationRepositoryTests {
 
         Mockito.when(locationRepository.save(mockLocation)).thenReturn(mockLocation);
         Location updatedLocation = locationRepository.save(mockLocation);
-        assertEquals(updatedLocation.getListDailyWeathers().size(), mockLocation.getListDailyWeathers().size());
+        assertEquals(updatedLocation.getListDailyWeather().size(), mockLocation.getListDailyWeather().size());
     }
 }

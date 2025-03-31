@@ -32,6 +32,9 @@ public class WeatherApiProjectApplication {
 		typeMap3.addMapping(src -> src.getId().getDayOfMonth(), DailyWeatherDTO::setDayOfMonth);
 		typeMap3.addMapping(src -> src.getId().getMonth(), DailyWeatherDTO::setMonth);
 
+		var typeMap4 = modelMapper.typeMap(DailyWeatherDTO.class, DailyWeather.class);
+		typeMap4.addMapping(src -> src.getDayOfMonth(), (dest, value) -> dest.getId().setDayOfMonth(!Objects.isNull(value) ? (Integer) value : 0));
+		typeMap4.addMapping(src -> src.getMonth(), (dest, value) -> dest.getId().setMonth(!Objects.isNull(value) ? (Integer) value : 0));
 		return modelMapper;
 	}
 

@@ -56,7 +56,7 @@ public class Location {
     private Boolean trashed;
 
     @OneToMany(mappedBy = "id.location", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DailyWeather> listDailyWeathers = new ArrayList<>();
+    private List<DailyWeather> listDailyWeather = new ArrayList<>();
 
     public Location(String cityName, String regionName, String countryCode, String countryName) {
         this.cityName = cityName;

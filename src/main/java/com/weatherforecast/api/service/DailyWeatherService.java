@@ -1,5 +1,6 @@
 package com.weatherforecast.api.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,5 +41,33 @@ public class DailyWeatherService {
         }
 
         return dailyWeatherRepository.findByLocationCode(locationCode);
+    }
+
+    public List<DailyWeather> updateByLocationCode(String code, List<DailyWeather> dailyWeatherInRequest) {
+        Location location = locationRepository.findByCode(code);
+
+        if (Objects.isNull(location)) {
+            throw new LocationNotFoundException(code);
+        }
+
+        for (DailyWeather data: dailyWeatherInRequest) {
+            data.getId().setLocation(location);
+        }
+
+        List<DailyWeather> dailyWeatherInDB = location.getListDailyWeather();
+        List<DailyWeather> dailyWeatherToBeRemoved = new ArrayList<>();
+
+        for (DailyWeather dailyForecast: dailyWeatherInDB) {
+            if (!dailyWeatherInRequest.contains(dailyForecast)) {
+                dailyWeatherToBeRemoved.add(dailyForecast.getShallowCopy());
+            }
+        }
+
+        for (DailyWeather forecastToBeRemoved: dailyWeatherToBeRemoved) {
+            dailyWeatherInDB.remove(forecastToBeRemoved);
+        }
+
+        return (List<DailyWeather>) dailyWeatherRepository.saveAll(dailyWeatherInRequest);
+
     }
 }

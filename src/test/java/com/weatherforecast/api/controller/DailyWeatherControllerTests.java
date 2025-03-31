@@ -2,7 +2,9 @@ package com.weatherforecast.api.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,7 +22,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weatherforecast.api.config.TestConfig;
+import com.weatherforecast.api.dto.DailyWeatherDTO;
 import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.GeolocationException;
@@ -33,6 +37,8 @@ import com.weatherforecast.api.service.GeolocationService;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DailyWeatherControllerTests {
     private static final String END_POINT_PATH = "/v1/daily";
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -71,7 +77,7 @@ public class DailyWeatherControllerTests {
         location.setRegionName("New York");
         location.setCountryCode("US");
         location.setCountryName("United States of America");
-        location.setListDailyWeathers(Collections.emptyList());
+        location.setListDailyWeather(Collections.emptyList());
 
         DailyWeather forecast1 = new DailyWeather()
         .location(location)
@@ -91,10 +97,10 @@ public class DailyWeatherControllerTests {
         .precipitation(30)
         .status("Sunny");
 
-        location.setListDailyWeathers(List.of(forecast1, forecast2));
+        location.setListDailyWeather(List.of(forecast1, forecast2));
 
         Mockito.when(geolocationService.getLocation(Mockito.anyString())).thenReturn(location);
-        when(dailyWeatherService.getByLocation(location)).thenReturn(location.getListDailyWeathers());
+        when(dailyWeatherService.getByLocation(location)).thenReturn(location.getListDailyWeather());
 
         String expectedLocation = location.toString();
         mockMvc.perform(get(END_POINT_PATH))
@@ -168,106 +174,122 @@ public class DailyWeatherControllerTests {
         .andDo(print());
     }
 
-    // @Test
-    // public void testUpdateShouldReturn400BadRequestBecauseNoData() throws Exception {
-    //     String requestUrl = END_POINT_PATH + "/NYC_USA";
-    //     List<HourlyWeatherDTO> listDTO = Collections.emptyList();
-    //     String requestBody = objectMapper.writeValueAsString(listDTO);
-    //     mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
-    //     .andExpect(status().isBadRequest())
-    //     .andExpect(jsonPath("$.errors[0]", is("Hourly forecast data cannot be empty")))
-    //     .andDo(print());
-    // }
+    @Test
+    public void testUpdateShouldReturn400BadRequestBecauseNoData() throws Exception {
+        String requestUrl = END_POINT_PATH + "/NYC_USA";
+        List<DailyWeatherDTO> listDTO = Collections.emptyList();
+        String requestBody = objectMapper.writeValueAsString(listDTO);
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0]", is("Daily forecast data cannot be empty")))
+        .andDo(print());
+    }
 
-    // @Test
-    // public void testUpdateShouldReturn400BadRequestBecauseInvalidData() throws Exception {
-    //     String requestUrl = END_POINT_PATH + "/NYC_USA";
+    @Test
+    public void testUpdateShouldReturn400BadRequestBecauseInvalidData() throws Exception {
+        String requestUrl = END_POINT_PATH + "/NYC_USA";
 
-    //     HourlyWeatherDTO dto1 = new HourlyWeatherDTO()
-    //     .hourOfDay(10)
-    //     .temperature(13)
-    //     .precipitation(700)
-    //     .status("Cloudy");
+        DailyWeatherDTO dto1 = new DailyWeatherDTO()
+        .dayOfMonth(40)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(30)
+        .precipitation(20)
+        .status("Clear");
 
-    //     HourlyWeatherDTO dto2 = new HourlyWeatherDTO()
-    //     .hourOfDay(-1)
-    //     .temperature(15)
-    //     .precipitation(60)
-    //     .status("");
+        DailyWeatherDTO dto2 = new DailyWeatherDTO()
+        .dayOfMonth(20)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(30)
+        .precipitation(20)
+        .status("Clear");
 
-    //     String requestBody = objectMapper.writeValueAsString(List.of(dto1, dto2));
-    //     mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
-    //     .andExpect(status().isBadRequest())
-    //     .andExpect(jsonPath("$.errors[0]", containsString("Precipitation must be in the range of 0 to 100 percentage")))
-    //     .andDo(print());
-    // }
+        String requestBody = objectMapper.writeValueAsString(List.of(dto1, dto2));
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.errors[0]", containsString("Day of month must be between 1 and 31")))
+        .andDo(print());
+    }
 
-    // @Test
-    // public void testUpdateShouldReturn404NotFound() throws Exception {
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+    @Test
+    public void testUpdateShouldReturn404NotFound() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    //     HourlyWeatherDTO dto1 = new HourlyWeatherDTO()
-    //     .hourOfDay(10)
-    //     .temperature(13)
-    //     .precipitation(70)
-    //     .status("Cloudy");
+        DailyWeatherDTO dto1 = new DailyWeatherDTO()
+        .dayOfMonth(20)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(30)
+        .precipitation(20)
+        .status("Clear");
 
-    //     List<HourlyWeatherDTO> listDTO = List.of(dto1);
-    //     String requestBody = objectMapper.writeValueAsString(listDTO);
-    //     when(hourlyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenThrow(LocationNotFoundException.class);
-    //     mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
-    //     .andExpect(status().isNotFound())
-    //     .andDo(print());
-    // }
+        List<DailyWeatherDTO> listDTO = List.of(dto1);
+        String requestBody = objectMapper.writeValueAsString(listDTO);
+        when(dailyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenThrow(LocationNotFoundException.class);
 
-    // @Test
-    // public void testUpdateShouldReturn200OK() throws Exception {
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isNotFound())
+        .andDo(print());
+    }
 
-    //     HourlyWeatherDTO dto1 = new HourlyWeatherDTO()
-    //     .hourOfDay(10)
-    //     .temperature(13)
-    //     .precipitation(70)
-    //     .status("Cloudy");
+    @Test
+    public void testUpdateShouldReturn200OK() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    //     HourlyWeatherDTO dto2 = new HourlyWeatherDTO()
-    //     .hourOfDay(11)
-    //     .temperature(15)
-    //     .precipitation(60)
-    //     .status("Sunny");
+        DailyWeatherDTO dto1 = new DailyWeatherDTO()
+        .dayOfMonth(20)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(30)
+        .precipitation(20)
+        .status("Clear");
 
-    //     Location location = new Location();
-    //     location.setCode(locationCode);
-    //     location.setCityName("New York City");
-    //     location.setCityName("New York");
-    //     location.setCountryCode("US");
-    //     location.setCountryName("United States of America");
+        DailyWeatherDTO dto2 = new DailyWeatherDTO()
+        .dayOfMonth(20)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(30)
+        .precipitation(20)
+        .status("Clear");
 
-    //     HourlyWeather forecast1 = new HourlyWeather()
-    //     .location(location)
-    //     .hourOfDay(10)
-    //     .temperature(13)
-    //     .precipitation(17)
-    //     .status("Cloudy");
+        Location location = new Location();
+        location.setCode(locationCode);
+        location.setCityName("New York City");
+        location.setCityName("New York");
+        location.setCountryCode("US");
+        location.setCountryName("United States of America");
 
-    //     HourlyWeather forecast2 = new HourlyWeather()
-    //     .location(location)
-    //     .hourOfDay(11)
-    //     .temperature(15)
-    //     .precipitation(60)
-    //     .status("Sunny");
-    //     List<HourlyWeatherDTO> listDTO = List.of(dto1, dto2);
+        DailyWeather forecast1 = new DailyWeather()
+        .location(location)
+        .dayOfMonth(16)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(32)
+        .precipitation(40)
+        .status("Cloudy");
 
-    //     List<HourlyWeather> listHourlyWeather = List.of(forecast1, forecast2);
+        DailyWeather forecast2 = new DailyWeather()
+        .location(location)
+        .dayOfMonth(17)
+        .month(7)
+        .minTemp(25)
+        .maxTemp(34)
+        .precipitation(30)
+        .status("Sunny");
+        List<DailyWeatherDTO> listDTO = List.of(dto1, dto2);
 
-    //     when(hourlyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenReturn(listHourlyWeather);
+        List<DailyWeather> listHourlyWeather = List.of(forecast1, forecast2);
 
-    //     String requestBody = objectMapper.writeValueAsString(listDTO);
-    //     mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
-    //     .andExpect(status().isOk())
-    //     .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
-    //     .andDo(print());
-    // }
+        when(dailyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenReturn(listHourlyWeather);
+
+        String requestBody = objectMapper.writeValueAsString(listDTO);
+        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("location", is(location.toString())))
+        .andExpect(jsonPath("$.daily_forecast[0].day_of_month", is(16)))
+        .andDo(print());
+    }
 }
