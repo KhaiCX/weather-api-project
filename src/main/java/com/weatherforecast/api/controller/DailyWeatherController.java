@@ -38,7 +38,7 @@ public class DailyWeatherController {
     public ResponseEntity<?> listDailyForecastByIPAddress(HttpServletRequest request) {
         String ipAddress = CommonUtility.getIPAddress(request);
         try {
-            
+
             Location locationFromIP = geolocationService.getLocation(ipAddress);
             List<DailyWeather> dailyForecast = locationFromIP.getListDailyWeathers();
 
@@ -59,7 +59,7 @@ public class DailyWeatherController {
         if (dailyForecast.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok().body(null);
+        return ResponseEntity.ok().body(listEntity2DTO(dailyForecast));
     }
 
     private DailyWeatherListDTO listEntity2DTO(List<DailyWeather> dailyForecast) {

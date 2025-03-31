@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,6 +24,7 @@ import com.weatherforecast.api.config.TestConfig;
 import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.GeolocationException;
+import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.DailyWeatherService;
 import com.weatherforecast.api.service.GeolocationService;
 
@@ -102,76 +104,69 @@ public class DailyWeatherControllerTests {
         .andDo(print());
     }
 
-    // @Test
-    // public void testGetByCodeShouldReturn400BadRequest() throws Exception {
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
-    //     mockMvc.perform(get(requestUrl))
-    //     .andExpect(status().isBadRequest())
-    //     .andDo(print());
-    // }
+    @Test
+    public void testGetByCodeShouldReturn404NotFound() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    // @Test
-    // public void testGetByCodeShouldReturn404NotFound() throws Exception {
-    //     Integer currentHour = 9;
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+        when(dailyWeatherService.getByLocationCode(locationCode)).thenThrow(LocationNotFoundException.class);
 
-    //     //when(hourlyWeatherService.getByLocationCode(locationCode, currentHour)).thenThrow(LocationNotFoundException.class);
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isNotFound())
+        .andDo(print());
+    }
 
-    //     mockMvc.perform(get(requestUrl).header(X_CURRENT_HOUR, String.valueOf(currentHour)))
-    //     .andExpect(status().isNotFound())
-    //     .andDo(print());
-    // }
+    @Test
+    public void testGetByCodeShouldReturn204NoContent() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    // @Test
-    // public void testGetByCodeShouldReturn204NoContent() throws Exception {
-    //     Integer currentHour = 9;
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+        when(dailyWeatherService.getByLocationCode(locationCode)).thenReturn(Collections.emptyList());
 
-    //     when(hourlyWeatherService.getByLocationCode(locationCode, currentHour)).thenReturn(Collections.emptyList());
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isNoContent())
+        .andDo(print());
+    }
 
-    //     mockMvc.perform(get(requestUrl).header(X_CURRENT_HOUR, String.valueOf(currentHour)))
-    //     .andExpect(status().isNoContent())
-    //     .andDo(print());
-    // }
+    @Test
+    public void testGetByCodeShouldReturn200OK() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    // @Test
-    // public void testGetByCodeShouldReturn200OK() throws Exception {
-    //     Integer currentHour = 9;
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
-    //     Location location = new Location();
-    //     location.setCode(locationCode);
-    //     location.setCityName("New York City");
-    //     location.setRegionName("New York");
-    //     location.setCountryCode("US");
-    //     location.setCountryName("United States of America");
+        Location location = new Location();
+        location.setCode(locationCode);
+        location.setCityName("New York City");
+        location.setRegionName("New York");
+        location.setCountryCode("US");
+        location.setCountryName("United States of America");
 
-    //     HourlyWeather forecast1 = new HourlyWeather()
-    //     .location(location)
-    //     .hourOfDay(10)
-    //     .temperature(13)
-    //     .precipitation(17)
-    //     .status("Cloudy");
+        DailyWeather forecast1 = new DailyWeather()
+        .location(location)
+        .dayOfMonth(16)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(32)
+        .precipitation(40)
+        .status("Cloudy");
 
-    //     HourlyWeather forecast2 = new HourlyWeather()
-    //     .location(location)
-    //     .hourOfDay(11)
-    //     .temperature(15)
-    //     .precipitation(60)
-    //     .status("Sunny");
+        DailyWeather forecast2 = new DailyWeather()
+        .location(location)
+        .dayOfMonth(17)
+        .month(7)
+        .minTemp(25)
+        .maxTemp(34)
+        .precipitation(30)
+        .status("Sunny");
 
-    //     when(hourlyWeatherService.getByLocationCode(locationCode, currentHour)).thenReturn(List.of(forecast1, forecast2));
+        when(dailyWeatherService.getByLocationCode(locationCode)).thenReturn(List.of(forecast1, forecast2));
 
-    //     mockMvc.perform(get(requestUrl).header(X_CURRENT_HOUR, String.valueOf(currentHour)))
-    //     .andExpect(status().isOk())
-    //     .andExpect(content().contentType("application/json"))
-    //     .andExpect(jsonPath("$.location", is(location.toString())))
-    //     .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
-    //     .andDo(print());
-    // }
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("application/json"))
+        .andExpect(jsonPath("$.location", is(location.toString())))
+        .andExpect(jsonPath("$.daily_forecast[0].day_of_month", is(16)))
+        .andDo(print());
+    }
 
     // @Test
     // public void testUpdateShouldReturn400BadRequestBecauseNoData() throws Exception {
