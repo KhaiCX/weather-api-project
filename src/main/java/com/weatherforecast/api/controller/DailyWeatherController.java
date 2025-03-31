@@ -52,8 +52,6 @@ public class DailyWeatherController {
                 return ResponseEntity.noContent().build();
             }
             return ResponseEntity.ok().body(listEntity2DTO(dailyForecast));
-        } catch (LocationNotFoundException exception) {
-            return ResponseEntity.notFound().build();
         } catch (GeolocationException exception) {
             return ResponseEntity.badRequest().build();
         }
@@ -96,7 +94,6 @@ public class DailyWeatherController {
         List<DailyWeatherDTO> dtos = new ArrayList<>();
         dailyForecast.forEach(dailyWeather -> {
             DailyWeatherDTO dto = modelMapper.map(dailyWeather, DailyWeatherDTO.class);
-            //listDTO.addDailyWeatherDTO(modelMapper.map(dailyWeather, DailyWeatherDTO.class));
             dtos.add(dto);
         });
         listDTO.setDailyForecast(dtos);

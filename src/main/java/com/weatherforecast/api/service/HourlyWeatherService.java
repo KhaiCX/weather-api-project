@@ -22,7 +22,7 @@ public class HourlyWeatherService {
         this.locationRepository = locationRepository;
     }
 
-    public List<HourlyWeather> getByLocation(Location location, Integer currentHour) throws LocationNotFoundException {
+    public List<HourlyWeather> getByLocation(Location location, Integer currentHour) {
         String countryCode = location.getCountryCode();
         String cityName = location.getCityName();
 
@@ -35,7 +35,7 @@ public class HourlyWeatherService {
         return repository.findByLocationCode(locationInDB.getCode(), currentHour);
     }
 
-    public List<HourlyWeather> getByLocationCode(String locationCode, int currentHour) throws LocationNotFoundException {
+    public List<HourlyWeather> getByLocationCode(String locationCode, int currentHour) {
         Location locationInDB = locationRepository.findByCode(locationCode);
 
         if (Objects.isNull(locationInDB)) {
@@ -45,7 +45,7 @@ public class HourlyWeatherService {
         return repository.findByLocationCode(locationCode, currentHour);
     }
 
-    public List<HourlyWeather> updateByLocationCode(String locationCode, List<HourlyWeather> hourlyForecastInRequest) throws LocationNotFoundException {
+    public List<HourlyWeather> updateByLocationCode(String locationCode, List<HourlyWeather> hourlyForecastInRequest) {
         Location location = locationRepository.findByCode(locationCode);
 
         if (Objects.isNull(location)) {
