@@ -3,6 +3,7 @@ package com.weatherforecast.api.controller;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,6 +40,14 @@ public class FullWeatherController {
         } catch (GeolocationException exception) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/{locationCode}")
+    public ResponseEntity<?> getFullWeatherByLocationCode(@PathVariable String locationCode) {
+        
+        Location locationInDB = fullWeatherService.get(locationCode);
+
+        return ResponseEntity.ok().body(entity2DTO(locationInDB));
     }
 
     private FullWeatherDTO entity2DTO(Location entity) {

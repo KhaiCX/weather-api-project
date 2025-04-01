@@ -26,4 +26,12 @@ public class FullWeatherService {
         }
         return locationInDB;
     }
+
+    public Location get(String locationCode) {
+        Location location = locationRepository.findByCode(locationCode);
+        if (Objects.isNull(location)) {
+            throw new LocationNotFoundException(locationCode);
+        }
+        return location;
+    }
 }

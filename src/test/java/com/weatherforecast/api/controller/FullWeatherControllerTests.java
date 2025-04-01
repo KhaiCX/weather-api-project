@@ -135,69 +135,86 @@ public class FullWeatherControllerTests {
         .andDo(print());
     }
 
-    // @Test
-    // public void testGetByCodeShouldReturn404NotFound() throws Exception {
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+    @Test
+    public void testGetByCodeShouldReturn404NotFound() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    //     when(dailyWeatherService.getByLocationCode(locationCode)).thenThrow(LocationNotFoundException.class);
+        when(fullWeatherService.get(locationCode)).thenThrow(LocationNotFoundException.class);
 
-    //     mockMvc.perform(get(requestUrl))
-    //     .andExpect(status().isNotFound())
-    //     .andDo(print());
-    // }
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isNotFound())
+        .andDo(print());
+    }
 
-    // @Test
-    // public void testGetByCodeShouldReturn204NoContent() throws Exception {
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+    @Test
+    public void testGetByCodeShouldReturn200OK() throws Exception {
+        String locationCode = "NYC_USA";
+        String requestUrl = END_POINT_PATH + "/" + locationCode;
 
-    //     when(dailyWeatherService.getByLocationCode(locationCode)).thenReturn(Collections.emptyList());
+        Location location = new Location();
+        location.setCode(locationCode);
+        location.setCityName("New York City");
+        location.setRegionName("New York");
+        location.setCountryCode("US");
+        location.setCountryName("United States of America");
 
-    //     mockMvc.perform(get(requestUrl))
-    //     .andExpect(status().isNoContent())
-    //     .andDo(print());
-    // }
+        DailyWeather dailyForecast1 = new DailyWeather()
+        .location(location)
+        .dayOfMonth(16)
+        .month(7)
+        .minTemp(23)
+        .maxTemp(32)
+        .precipitation(40)
+        .status("Cloudy");
 
-    // @Test
-    // public void testGetByCodeShouldReturn200OK() throws Exception {
-    //     String locationCode = "NYC_USA";
-    //     String requestUrl = END_POINT_PATH + "/" + locationCode;
+        DailyWeather dailyForecast2 = new DailyWeather()
+        .location(location)
+        .dayOfMonth(17)
+        .month(7)
+        .minTemp(25)
+        .maxTemp(34)
+        .precipitation(30)
+        .status("Sunny");
 
-    //     Location location = new Location();
-    //     location.setCode(locationCode);
-    //     location.setCityName("New York City");
-    //     location.setRegionName("New York");
-    //     location.setCountryCode("US");
-    //     location.setCountryName("United States of America");
+        RealtimeWeather realtimeWeather = new RealtimeWeather();
+        realtimeWeather.setTemperature(12);
+        realtimeWeather.setHumidity(32);
+        realtimeWeather.setPrecipitation(88);
+        realtimeWeather.setWindSpeed(5);
+        realtimeWeather.setStatus("Cloudy");
+        realtimeWeather.setLastUpdated(LocalDateTime.now());
 
-    //     DailyWeather forecast1 = new DailyWeather()
-    //     .location(location)
-    //     .dayOfMonth(16)
-    //     .month(7)
-    //     .minTemp(23)
-    //     .maxTemp(32)
-    //     .precipitation(40)
-    //     .status("Cloudy");
+        HourlyWeather hourlyForecast1 = new HourlyWeather()
+        .location(location)
+        .hourOfDay(10)
+        .temperature(13)
+        .precipitation(17)
+        .status("Cloudy");
 
-    //     DailyWeather forecast2 = new DailyWeather()
-    //     .location(location)
-    //     .dayOfMonth(17)
-    //     .month(7)
-    //     .minTemp(25)
-    //     .maxTemp(34)
-    //     .precipitation(30)
-    //     .status("Sunny");
+        HourlyWeather hourlyForecast2 = new HourlyWeather()
+        .location(location)
+        .hourOfDay(11)
+        .temperature(15)
+        .precipitation(60)
+        .status("Sunny");
 
-    //     when(dailyWeatherService.getByLocationCode(locationCode)).thenReturn(List.of(forecast1, forecast2));
+        location.setListDailyWeather(List.of(dailyForecast1, dailyForecast2));
+        location.setRealtimeWeather(realtimeWeather);
+        location.setListHourlyWeather(List.of(hourlyForecast1, hourlyForecast2));
 
-    //     mockMvc.perform(get(requestUrl))
-    //     .andExpect(status().isOk())
-    //     .andExpect(content().contentType("application/json"))
-    //     .andExpect(jsonPath("$.location", is(location.toString())))
-    //     .andExpect(jsonPath("$.daily_forecast[0].day_of_month", is(16)))
-    //     .andDo(print());
-    // }
+        Mockito.when(geolocationService.getLocation(Mockito.anyString())).thenReturn(location);
+        when(fullWeatherService.get(locationCode)).thenReturn(location);
+        String expectedLocation = location.toString();
+
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.location", is(expectedLocation)))
+        .andExpect(jsonPath("$.realtime_weather.temperature", is(12)))
+        .andExpect(jsonPath("$.hourly_weather[0].hour_of_day", is(10)))
+        .andExpect(jsonPath("$.daily_weather[0].day_of_month", is(16)))
+        .andDo(print());
+    }
 
     // @Test
     // public void testUpdateShouldReturn400BadRequestBecauseNoData() throws Exception {
