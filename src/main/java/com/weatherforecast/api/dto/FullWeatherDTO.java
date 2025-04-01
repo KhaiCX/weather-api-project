@@ -3,7 +3,9 @@ package com.weatherforecast.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.weatherforecast.api.common.RealtimeWeatherFieldFilter;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +15,7 @@ public class FullWeatherDTO {
     private String location;
 
     @JsonProperty("realtime_weather")
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = RealtimeWeatherFieldFilter.class)
     private RealtimeWeatherDTO RealtimeWeather = new RealtimeWeatherDTO();
 
     @JsonProperty("hourly_weather")
