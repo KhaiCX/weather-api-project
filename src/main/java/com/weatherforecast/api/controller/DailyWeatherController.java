@@ -20,7 +20,6 @@ import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.exception.BadRequestException;
 import com.weatherforecast.api.exception.GeolocationException;
-import com.weatherforecast.api.exception.LocationNotFoundException;
 import com.weatherforecast.api.service.DailyWeatherService;
 import com.weatherforecast.api.service.GeolocationService;
 
