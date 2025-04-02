@@ -35,7 +35,7 @@ public class FullWeatherController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getFullWeatherByIPAress(HttpServletRequest request) {
+    public ResponseEntity<?> getFullWeatherByIPAddress(HttpServletRequest request) {
         String ipAddress = CommonUtility.getIPAddress(request);
         try {
 
