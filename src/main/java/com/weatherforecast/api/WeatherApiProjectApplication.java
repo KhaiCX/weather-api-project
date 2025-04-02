@@ -25,32 +25,46 @@ public class WeatherApiProjectApplication {
 	public ModelMapper getModelMapper() {
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-		var typeMap1 = modelMapper.typeMap(HourlyWeather.class, HourlyWeatherDTO.class);
-		typeMap1.addMapping(src -> src.getId().getHourOfDay(), HourlyWeatherDTO::setHourOfDay);
 
-		var typeMap2 = modelMapper.typeMap(HourlyWeatherDTO.class, HourlyWeather.class);
-		typeMap2.addMapping(src -> src.getHourOfDay(),
-		(dest, value) -> {dest.getId().setHourOfDay(!Objects.isNull(value) ? (Integer) value : 0);});
-
-		var typeMap3 = modelMapper.typeMap(DailyWeather.class, DailyWeatherDTO.class);
-		typeMap3.addMapping(src -> src.getId().getDayOfMonth(), DailyWeatherDTO::setDayOfMonth);
-		typeMap3.addMapping(src -> src.getId().getMonth(), DailyWeatherDTO::setMonth);
-
-		var typeMap4 = modelMapper.typeMap(DailyWeatherDTO.class, DailyWeather.class);
-		typeMap4.addMapping(src -> src.getDayOfMonth(), (dest, value) -> dest.getId().setDayOfMonth(!Objects.isNull(value) ? (Integer) value : 0));
-		typeMap4.addMapping(src -> src.getMonth(), (dest, value) -> dest.getId().setMonth(!Objects.isNull(value) ? (Integer) value : 0));
-
-		var typeMap5 = modelMapper.typeMap(Location.class, FullWeatherDTO.class);
-		typeMap5.addMapping(src -> src.toString(), FullWeatherDTO::setLocation);
-
-		var typeMap6 = modelMapper.typeMap(RealtimeWeatherDTO.class, RealtimeWeather.class);
-		typeMap6.addMappings(m -> m.skip(RealtimeWeather::setLocation));
+		configureMappingForHourlyWeather(modelMapper);
+		configureMappingForDailyWeather(modelMapper);
+		configureMappingForFullWeather(modelMapper);
+		configureMappingForRealtimeWeather(modelMapper);
 		return modelMapper;
 	}
 
 	@Bean
 	public IP2Location geIp2Location() {
 		return new IP2Location();
+	}
+
+	private void configureMappingForHourlyWeather(ModelMapper modelMapper) {
+		modelMapper.typeMap(HourlyWeather.class, HourlyWeatherDTO.class)
+			.addMapping(src -> src.getId().getHourOfDay(), HourlyWeatherDTO::setHourOfDay);
+
+		modelMapper.typeMap(HourlyWeatherDTO.class, HourlyWeather.class)
+			.addMapping(src -> src.getHourOfDay(),
+				(dest, value) -> {dest.getId().setHourOfDay(!Objects.isNull(value) ? (Integer) value : 0);});
+	}
+
+	private void configureMappingForDailyWeather(ModelMapper modelMapper) {
+		modelMapper.typeMap(DailyWeather.class, DailyWeatherDTO.class)
+			.addMapping(src -> src.getId().getDayOfMonth(), DailyWeatherDTO::setDayOfMonth)
+			.addMapping(src -> src.getId().getMonth(), DailyWeatherDTO::setMonth);
+
+		modelMapper.typeMap(DailyWeatherDTO.class, DailyWeather.class)
+			.addMapping(src -> src.getDayOfMonth(), (dest, value) -> dest.getId().setDayOfMonth(!Objects.isNull(value) ? (Integer) value : 0))
+			.addMapping(src -> src.getMonth(), (dest, value) -> dest.getId().setMonth(!Objects.isNull(value) ? (Integer) value : 0));
+	}
+
+	private void configureMappingForFullWeather(ModelMapper modelMapper) {
+		modelMapper.typeMap(Location.class, FullWeatherDTO.class)
+			.addMapping(src -> src.toString(), FullWeatherDTO::setLocation);
+	}
+
+	private void configureMappingForRealtimeWeather(ModelMapper modelMapper) {
+		modelMapper.typeMap(RealtimeWeatherDTO.class, RealtimeWeather.class)
+			.addMappings(m -> m.skip(RealtimeWeather::setLocation));
 	}
 
 	public static void main(String[] args) {

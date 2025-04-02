@@ -114,6 +114,21 @@ public class Location {
         setTrashed(trashed);
         return this;
     }
+
+    public void copyFieldsFrom(Location another) {
+        setCityName(another.getCityName());
+        setRegionName(another.getRegionName());
+        setCountryCode(another.getCountryCode());
+        setCountryName(another.getCountryName());
+        setEnabled(another.getEnabled());
+    }
+
+    public void copeAllFieldFrom(Location another) {
+        copyFieldsFrom(another);
+        setCode(another.getCode());
+        setTrashed(another.getTrashed());
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

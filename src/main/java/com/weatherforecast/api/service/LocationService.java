@@ -48,11 +48,7 @@ public class LocationService {
             throw new LocationNotFoundException(code);
         }
 
-        location.setCityName(locationInRequest.getCityName());
-        location.setRegionName(locationInRequest.getRegionName());
-        location.setCountryCode(locationInRequest.getCountryCode());
-        location.setCountryName(locationInRequest.getCountryName());
-        location.setEnabled(locationInRequest.getEnabled());
+        location.copyFieldsFrom(locationInRequest);
         return locationRepository.save(location);
     }
 
