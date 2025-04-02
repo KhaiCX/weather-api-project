@@ -69,7 +69,51 @@ public class Location {
         setCode(code);
         return this;
     }
+
+    public Location cityName(String cityName) {
+        setCityName(cityName);
+        return this;
+    }
+
+    public Location regionName(String regionName) {
+        setRegionName(regionName);
+        return this;
+    }
+
+    public Location countryCode(String countryCode) {
+        setCountryCode(countryCode);
+        return this;
+    }
+
+    public Location countryName(String countryName) {
+        setCountryName(countryName);
+        return this;
+    }
+
+    public Location realtimeWeather(RealtimeWeather realtimeWeather) {
+        setRealtimeWeather(realtimeWeather);
+        return this;
+    }
+
+    public Location listHourlyWeather(List<HourlyWeather> listHourlyWeather) {
+        setListHourlyWeather(listHourlyWeather);
+        return this;
+    }
+
+    public Location listDailyWeather(List<DailyWeather> listDailyWeather) {
+        setListDailyWeather(listDailyWeather);
+        return this;
+    }
+
+    public Location enabled(Boolean enabled) {
+        setEnabled(enabled);
+        return this;
+    }
     
+    public Location trashed(Boolean trashed) {
+        setTrashed(trashed);
+        return this;
+    }
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

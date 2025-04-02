@@ -69,5 +69,38 @@ public class RealtimeWeather {
         return Objects.hash(locationCode);
     }
 
-    
+    public RealtimeWeather location(String locationCode) {
+        setLocationCode(locationCode);
+        return this;
+    }
+
+    public RealtimeWeather temperature(Integer temperature) {
+        setTemperature(temperature);
+        return this;
+    }
+
+    public RealtimeWeather humidity(Integer humidity) {
+        setHumidity(humidity);
+        return this;
+    }
+
+    public RealtimeWeather precipitation(Integer precipitation) {
+        setPrecipitation(precipitation);
+        return this;
+    }
+
+    public RealtimeWeather status(String status) {
+        setStatus(status);
+        return this;
+    }
+
+    public RealtimeWeather windSpeed(Integer windSpeed) {
+        setWindSpeed(windSpeed);
+        return this;
+    }
+
+    public RealtimeWeather lastUpdated(LocalDateTime lastUpdated) {
+        setLastUpdated(lastUpdated);
+        return this;
+    }
 }

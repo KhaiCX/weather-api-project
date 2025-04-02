@@ -36,4 +36,39 @@ public class RealtimeWeatherDTO {
     @JsonProperty("last_updated")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     private LocalDateTime lastUpdated;
+
+    public RealtimeWeatherDTO location(String location) {
+        setLocation(location);
+        return this;
+    }
+
+    public RealtimeWeatherDTO temperature(Integer temperature) {
+        setTemperature(temperature);
+        return this;
+    }
+
+    public RealtimeWeatherDTO humidity(Integer humidity) {
+        setHumidity(humidity);
+        return this;
+    }
+
+    public RealtimeWeatherDTO precipitation(Integer precipitation) {
+        setPrecipitation(precipitation);
+        return this;
+    }
+
+    public RealtimeWeatherDTO status(String status) {
+        setStatus(status);
+        return this;
+    }
+
+    public RealtimeWeatherDTO windSpeed(Integer windSpeed) {
+        setWindSpeed(windSpeed);
+        return this;
+    }
+
+    public RealtimeWeatherDTO lastUpdated(LocalDateTime lastUpdated) {
+        setLastUpdated(lastUpdated);
+        return this;
+    }
 }

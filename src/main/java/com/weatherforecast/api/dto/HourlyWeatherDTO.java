@@ -16,6 +16,7 @@ import lombok.Setter;
 @JsonPropertyOrder({"hour_of_day", "temperature", "precipitation", "status"})
 public class HourlyWeatherDTO {
     @JsonProperty("hour_of_day")
+    @Range(min = 0, max = 23, message = "Hourly of day must be in the range of 0 to 23")
     private Integer hourOfDay;
 
     @Range(min = -50, max = 50, message = "Temperator must be in the range of -50 to 50 Celsius degree")
