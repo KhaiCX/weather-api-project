@@ -13,7 +13,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
-public class LocationService {
+public class LocationService extends AbstractLocationService {
 
     private LocationRepository locationRepository;
 
@@ -27,16 +27,6 @@ public class LocationService {
 
     public List<Location> list() {
         return locationRepository.findUnTrashed();
-    }
-
-    public Location get(String code) {
-        Location location = locationRepository.findByCode(code);
-
-        if (Objects.isNull(location)) {
-            throw new LocationNotFoundException(code);
-        }
-
-        return location;
     }
 
     public Location update(Location locationInRequest) {

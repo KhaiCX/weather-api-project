@@ -17,6 +17,9 @@ import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.entity.RealtimeWeather;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 @SpringBootApplication
 public class WeatherApiProjectApplication {
@@ -31,6 +34,14 @@ public class WeatherApiProjectApplication {
 		configureMappingForFullWeather(modelMapper);
 		configureMappingForRealtimeWeather(modelMapper);
 		return modelMapper;
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+		return objectMapper;
 	}
 
 	@Bean

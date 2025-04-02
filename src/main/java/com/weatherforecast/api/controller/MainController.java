@@ -35,20 +35,20 @@ public class MainController {
         String realtimeWeatherByCodeUrl = linkTo(methodOn(RealtimeWeatherController.class).getRealtimeWeatherByLocationCode(null)).toString();
         rootEntity.setRealtimeWeatherByCodeUrl(realtimeWeatherByCodeUrl);
 
-        String hourlyForecastByIPUrl = linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByIPAddress(null)).toString();
-        rootEntity.setHourlyForecastByIPUrl(hourlyForecastByIPUrl);
+        String hourlyForecastByIpUrl = linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByIPAddress(null)).toString();
+        rootEntity.setHourlyForecastByIpUrl(hourlyForecastByIpUrl);
 
         String hourlyForecastByCodeUrl = linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByLocationCode(null, null)).toString();
         rootEntity.setHourlyForecastByCodeUrl(hourlyForecastByCodeUrl);
 
-        String dailyForecastByIPUrl = linkTo(methodOn(DailyWeatherController.class).listDailyForecastByIPAddress(null)).toString();
-        rootEntity.setDailyForecastByIPUrl(dailyForecastByIPUrl);
+        String dailyForecastByIpUrl = linkTo(methodOn(DailyWeatherController.class).listDailyForecastByIPAddress(null)).toString();
+        rootEntity.setDailyForecastByIpUrl(dailyForecastByIpUrl);
 
         String dailyForecastByCodeUrl = linkTo(methodOn(DailyWeatherController.class).listDailyForecastByLocationCode(null)).toString();
         rootEntity.setDailyForecastByCodeUrl(dailyForecastByCodeUrl);
 
-        String fullWeatherByIPUrl = linkTo(methodOn(FullWeatherController.class).getFullWeatherByIPAddress(null)).toString();
-        rootEntity.setFullWeatherByIPUrl(fullWeatherByIPUrl);
+        String fullWeatherByIpUrl = linkTo(methodOn(FullWeatherController.class).getFullWeatherByIPAddress(null)).toString();
+        rootEntity.setFullWeatherByIpUrl(fullWeatherByIpUrl);
 
         String fullWeatherByCodeUrl = linkTo(methodOn(FullWeatherController.class).getFullWeatherByLocationCode(null)).toString();
         rootEntity.setFullWeatherByCodeUrl(fullWeatherByCodeUrl);
