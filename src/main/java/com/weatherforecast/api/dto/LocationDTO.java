@@ -35,7 +35,7 @@ public class LocationDTO {
 
     @JsonProperty("country_name")
     @NotNull(message = "Country name cannot be null")
-    @Length(min = 3, max = 64, message = "Country code must have 3-64 characters")
+    @Length(min = 3, max = 64, message = "Country name must have 3-64 characters")
     private String countryName;
 
     private Boolean enabled;

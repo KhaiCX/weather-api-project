@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.weatherforecast.api.entity.RootEntity;
-import com.weatherforecast.api.controller.LocationController;
-import com.weatherforecast.api.controller.HourlyWeatherController;
-import com.weatherforecast.api.controller.DailyWeatherController;
-import com.weatherforecast.api.controller.FullWeatherController;
 
 @RestController
 public class MainController {

@@ -37,14 +37,6 @@ public class WeatherApiProjectApplication {
 	}
 
 	@Bean
-	public ObjectMapper objectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-		objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-		return objectMapper;
-	}
-
-	@Bean
 	public IP2Location geIp2Location() {
 		return new IP2Location();
 	}
