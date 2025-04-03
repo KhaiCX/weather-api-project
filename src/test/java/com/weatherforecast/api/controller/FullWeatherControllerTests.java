@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,11 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.weatherforecast.api.common.FullWeatherModelAssembler;
 import com.weatherforecast.api.config.TestConfig;
 import com.weatherforecast.api.dto.DailyWeatherDTO;
 import com.weatherforecast.api.dto.HourlyWeatherDTO;
@@ -41,6 +44,8 @@ import com.weatherforecast.api.service.GeolocationService;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class FullWeatherControllerTests {
     private static final String END_POINT_PATH = "/v1/full";
+    private static final String RESPONSE_CONTENT_TYPE = "application/hal+json";
+    private static final String REQUEST_CONTENT_TYPE = "application/json";
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -49,6 +54,9 @@ public class FullWeatherControllerTests {
     private GeolocationService geolocationService;
     @Autowired
     private FullWeatherService fullWeatherService;
+    @SuppressWarnings("removal")
+    @SpyBean
+    private FullWeatherModelAssembler fullWeatherModelAssembler;
 
     private Location location;
 
@@ -152,10 +160,12 @@ public class FullWeatherControllerTests {
         String expectedLocation = location.toString();
         mockMvc.perform(get(END_POINT_PATH))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(RESPONSE_CONTENT_TYPE))
         .andExpect(jsonPath("$.location", is(expectedLocation)))
         .andExpect(jsonPath("$.realtime_weather.temperature", is(50)))
         .andExpect(jsonPath("$.hourly_weather[0].hour_of_day", is(10)))
         .andExpect(jsonPath("$.daily_weather[0].day_of_month", is(16)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/full")))
         .andDo(print());
     }
 
@@ -185,10 +195,12 @@ public class FullWeatherControllerTests {
 
         mockMvc.perform(get(requestUrl))
         .andExpect(status().isOk())
+        .andExpect(content().contentType(RESPONSE_CONTENT_TYPE))
         .andExpect(jsonPath("$.location", is(expectedLocation)))
         .andExpect(jsonPath("$.realtime_weather.temperature", is(50)))
         .andExpect(jsonPath("$.hourly_weather[0].hour_of_day", is(10)))
         .andExpect(jsonPath("$.daily_weather[0].day_of_month", is(16)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/full/" + location.getCode())))
         .andDo(print());
     }
 
@@ -199,7 +211,7 @@ public class FullWeatherControllerTests {
         FullWeatherDTO dto = new FullWeatherDTO();
         dto.setLocation(location.toString());
         String requestBody = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         //.andExpect(jsonPath("$.errors[0]", is("Hourly Weather data cannot be empty")))
         .andDo(print());
@@ -213,7 +225,7 @@ public class FullWeatherControllerTests {
 
         dto.getListHourlyWeather().add(hourlyWeatherDTO);
         String requestBody = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         //.andExpect(jsonPath("$.errors[0]", is("Daily Weather data cannot be empty")))
         .andDo(print());
@@ -232,7 +244,7 @@ public class FullWeatherControllerTests {
 
         String requestBody = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         //.andExpect(jsonPath("$.errors[0]", containsString("Temperator must be in the range of -50 to 50 Celsius degree")))
         .andDo(print());
@@ -251,7 +263,7 @@ public class FullWeatherControllerTests {
 
         String requestBody = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors[0]", containsString("Hourly of day must be in the range of 0 to 23")))
         .andDo(print());
@@ -270,7 +282,7 @@ public class FullWeatherControllerTests {
 
         String requestBody = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors[0]", containsString("Status must be in between 3-50 characters")))
         .andDo(print());
@@ -289,7 +301,7 @@ public class FullWeatherControllerTests {
         String requestBody = objectMapper.writeValueAsString(dto);
 
         when(fullWeatherService.update(Mockito.eq(location.getCode()), Mockito.any())).thenThrow(LocationNotFoundException.class);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isNotFound())
         .andDo(print());
     }
@@ -307,8 +319,9 @@ public class FullWeatherControllerTests {
         String requestBody = objectMapper.writeValueAsString(dto);
 
         when(fullWeatherService.update(Mockito.eq(location.getCode()), Mockito.any())).thenReturn(location);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(RESPONSE_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/full/" + location.getCode())))
         .andDo(print());
     }
 }
