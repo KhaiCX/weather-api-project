@@ -14,9 +14,10 @@ public class MainController {
 
     @GetMapping("/")
     public ResponseEntity<RootEntity> handleBaseURI() {
-        return ResponseEntity.ok().body(creaRootEntity());
+        return ResponseEntity.ok().body(createRootEntity());
     }
-    private RootEntity creaRootEntity() {
+
+    private RootEntity createRootEntity() {
         RootEntity rootEntity = new RootEntity();
 
         String locationsUrl = linkTo(methodOn(LocationController.class).listLocations()).toString();

@@ -34,6 +34,9 @@ import static org.hamcrest.Matchers.is;
 public class RealtimeWeatherControllerTests {
 
     private static final String END_POINT_PATH = "/v1/realtime";
+    private static final String RESPONSE_CONTENT_TYPE = "application/hal+json";
+    private static final String REQUEST_CONTENT_TYPE = "application/json";
+    
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -91,8 +94,12 @@ public class RealtimeWeatherControllerTests {
 
         mockMvc.perform(get(END_POINT_PATH))
         .andExpect(status().isOk())
-        .andExpect(content().contentType("application/json"))
+        .andExpect(content().contentType(RESPONSE_CONTENT_TYPE))
         .andExpect(jsonPath("$.location", is(expectedLocation)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/realtime")))
+        .andExpect(jsonPath("$._links.daily_forecast.href", is("http://localhost/v1/daily")))
+        .andExpect(jsonPath("$._links.hourly_forecast.href", is("http://localhost/v1/hourly")))
+        .andExpect(jsonPath("$._links.full_forecast.href", is("http://localhost/v1/full")))
         .andDo(print());
     }
 
@@ -139,8 +146,12 @@ public class RealtimeWeatherControllerTests {
 
         mockMvc.perform(get(requestUrl))
         .andExpect(status().isOk())
-        .andExpect(content().contentType("application/json"))
+        .andExpect(content().contentType(RESPONSE_CONTENT_TYPE))
         .andExpect(jsonPath("$.location", is(expectedLocation)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/realtime/" + code)))
+        .andExpect(jsonPath("$._links.daily_forecast.href", is("http://localhost/v1/daily/" + code)))
+        .andExpect(jsonPath("$._links.hourly_forecast.href", is("http://localhost/v1/hourly/" + code)))
+        .andExpect(jsonPath("$._links.full_forecast.href", is("http://localhost/v1/full/" + code)))
         .andDo(print());
     }
 
@@ -158,7 +169,7 @@ public class RealtimeWeatherControllerTests {
         dto.setLastUpdated(LocalDateTime.now());
 
         String bodyContent = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(bodyContent))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(bodyContent))
         .andExpect(status().isBadRequest())
         .andDo(print());
     }
@@ -179,7 +190,7 @@ public class RealtimeWeatherControllerTests {
         Mockito.when(realtimeWeatherService.update(Mockito.eq(locationCode), Mockito.any())).thenThrow(LocationNotFoundException.class);
 
         String bodyContent = objectMapper.writeValueAsString(dto);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(bodyContent))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(bodyContent))
         .andExpect(status().isNotFound())
         .andDo(print());
     }
@@ -222,9 +233,13 @@ public class RealtimeWeatherControllerTests {
 
         String expectedLocation = location.getCityName() + ", " + location.getRegionName() + ", " + location.getCountryCode();
 
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(bodyContent))
+        mockMvc.perform(put(requestUrl).contentType(RESPONSE_CONTENT_TYPE).content(bodyContent))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.location", is(expectedLocation)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/realtime/" + code)))
+        .andExpect(jsonPath("$._links.daily_forecast.href", is("http://localhost/v1/daily/" + code)))
+        .andExpect(jsonPath("$._links.hourly_forecast.href", is("http://localhost/v1/hourly/" + code)))
+        .andExpect(jsonPath("$._links.full_forecast.href", is("http://localhost/v1/full/" + code)))
         .andDo(print());
     }
 }

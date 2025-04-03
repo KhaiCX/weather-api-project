@@ -17,9 +17,6 @@ import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.HourlyWeather;
 import com.weatherforecast.api.entity.Location;
 import com.weatherforecast.api.entity.RealtimeWeather;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 @SpringBootApplication
 public class WeatherApiProjectApplication {

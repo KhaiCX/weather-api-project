@@ -1,5 +1,8 @@
 package com.weatherforecast.api.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +51,7 @@ public class RealtimeWeatherController {
         try {
             Location locationFromIP = geolocationService.getLocation(ipAddress);
             RealtimeWeather realtimeWeather = realtimeWeatherService.getByLocation(locationFromIP);
-            return ResponseEntity.ok().body(entity2DTO(realtimeWeather));
+            return ResponseEntity.ok().body(addLinksByIp(entity2DTO(realtimeWeather)));
 
         } catch (GeolocationException exception) {
             LOGGER.error(exception.getMessage(), exception);
@@ -64,7 +67,7 @@ public class RealtimeWeatherController {
     public ResponseEntity<?> getRealtimeWeatherByLocationCode(@PathVariable String locationCode) {
         try {
             RealtimeWeather realtimeWeather = realtimeWeatherService.getByLocationCode(locationCode);
-            return ResponseEntity.ok().body(entity2DTO(realtimeWeather));
+            return ResponseEntity.ok().body(addLinksByLocation(entity2DTO(realtimeWeather), locationCode));
         } catch (LocationNotFoundException exception) {
             LOGGER.error(exception.getMessage(), exception);
             return ResponseEntity.notFound().build();
@@ -78,7 +81,7 @@ public class RealtimeWeatherController {
 
         RealtimeWeather updatedRealtimeWeather = realtimeWeatherService.update(locationCode, realtimeWeather);
 
-        return ResponseEntity.ok().body(entity2DTO(updatedRealtimeWeather));
+        return ResponseEntity.ok().body(addLinksByLocation(entity2DTO(updatedRealtimeWeather), locationCode));
     }
 
     private RealtimeWeatherDTO entity2DTO(RealtimeWeather realtimeWeather) {
@@ -87,5 +90,21 @@ public class RealtimeWeatherController {
 
     private RealtimeWeather dto2Entity(RealtimeWeatherDTO dto) {
         return modelMapper.map(dto, RealtimeWeather.class);
+    }
+
+    private RealtimeWeatherDTO addLinksByIp(RealtimeWeatherDTO dto) {
+        dto.add(linkTo(methodOn(RealtimeWeatherController.class).getRealtimeWeatherByIPAddress(null)).withSelfRel());
+        dto.add(linkTo(methodOn(DailyWeatherController.class).listDailyForecastByIPAddress(null)).withRel("daily_forecast"));
+        dto.add(linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByIPAddress(null)).withRel("hourly_forecast"));
+        dto.add(linkTo(methodOn(FullWeatherController.class).getFullWeatherByIPAddress(null)).withRel("full_forecast"));
+        return dto;
+    }
+
+    private RealtimeWeatherDTO addLinksByLocation(RealtimeWeatherDTO dto, String locationCode) {
+        dto.add(linkTo(methodOn(RealtimeWeatherController.class).getRealtimeWeatherByLocationCode(locationCode)).withSelfRel());
+        dto.add(linkTo(methodOn(DailyWeatherController.class).listDailyForecastByLocationCode(locationCode)).withRel("daily_forecast"));
+        dto.add(linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByLocationCode(locationCode, null)).withRel("hourly_forecast"));
+        dto.add(linkTo(methodOn(FullWeatherController.class).getFullWeatherByLocationCode(locationCode)).withRel("full_forecast"));
+        return dto;
     }
 }
