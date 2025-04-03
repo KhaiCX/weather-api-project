@@ -1,9 +1,13 @@
 package com.weatherforecast.api.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +54,7 @@ public class DailyWeatherController {
             if (dailyForecast.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-            return ResponseEntity.ok().body(listEntity2DTO(dailyForecast));
+            return ResponseEntity.ok().body(addLinksByIp(listEntity2DTO(dailyForecast)));
         } catch (GeolocationException exception) {
             return ResponseEntity.badRequest().build();
         }
@@ -62,7 +66,7 @@ public class DailyWeatherController {
         if (dailyForecast.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok().body(listEntity2DTO(dailyForecast));
+        return ResponseEntity.ok().body(addLinksByLocation(listEntity2DTO(dailyForecast), locationCode));
     }
 
     @PutMapping("/{locationCode}")
@@ -82,7 +86,7 @@ public class DailyWeatherController {
 
         List<DailyWeather> updatedForecast = dailyWeatherService.updateByLocationCode(locationCode, dailyWeather);
 
-        return ResponseEntity.ok().body(listEntity2DTO(updatedForecast));
+        return ResponseEntity.ok().body(addLinksByLocation(listEntity2DTO(updatedForecast), locationCode));
     }
 
     private DailyWeatherListDTO listEntity2DTO(List<DailyWeather> dailyForecast) {
@@ -108,4 +112,38 @@ public class DailyWeatherController {
 
         return listEntity;
     }
+
+    private EntityModel<DailyWeatherListDTO> addLinksByIp(DailyWeatherListDTO dtos) {
+        return EntityModel.of(dtos)
+            .add(linkTo(
+                methodOn(DailyWeatherController.class).listDailyForecastByIPAddress(null))
+                .withSelfRel())
+            .add(linkTo(
+                methodOn(RealtimeWeatherController.class).getRealtimeWeatherByIPAddress(null))
+                .withRel("realtime_weather"))
+            .add(linkTo(
+                methodOn(HourlyWeatherController.class).listHourlyForecastByIPAddress(null))
+                .withRel("hourly_forecast"))
+            .add(linkTo(
+                methodOn(FullWeatherController.class).getFullWeatherByIPAddress(null))
+                .withRel("full_forecast"));
+
+    }
+
+    private EntityModel<DailyWeatherListDTO> addLinksByLocation(DailyWeatherListDTO dtos, String locationCode) {
+        return EntityModel.of(dtos)
+            .add(linkTo(
+                methodOn(DailyWeatherController.class).listDailyForecastByLocationCode(locationCode))
+                .withSelfRel())
+            .add(linkTo(
+                methodOn(RealtimeWeatherController.class).getRealtimeWeatherByLocationCode(locationCode))
+                .withRel("realtime_weather"))
+            .add(linkTo(
+                methodOn(HourlyWeatherController.class).listHourlyForecastByLocationCode(locationCode, null))
+                .withRel("hourly_forecast"))
+            .add(linkTo(
+                methodOn(FullWeatherController.class).getFullWeatherByLocationCode(locationCode))
+                .withRel("full_forecast"));
+    }
+    
 }
