@@ -38,6 +38,8 @@ import com.weatherforecast.api.service.HourlyWeatherService;
 public class HourlyWeatherControllerTests {
     private static final String END_POINT_PATH = "/v1/hourly";
     private static final String X_CURRENT_HOUR = "X-Current-Hour";
+    private static final String RESPONSE_CONTENT_TYPE = "application/hal+json";
+    private static final String REQUEST_CONTENT_TYPE = "application/json";
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -81,12 +83,12 @@ public class HourlyWeatherControllerTests {
     public void testGetByIPShouldReturn200OK() throws Exception {
 
         Integer currentHour = 9;
-        Location location = new Location();
-        location.setCode("NYC_USA");
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
+        Location location = new Location()
+        .code("NYC_USA")
+        .cityName("New York City")
+        .regionName("New York")
+        .countryCode("US")
+        .countryName("United States of America");
 
         HourlyWeather forecast1 = new HourlyWeather()
         .location(location)
@@ -110,6 +112,10 @@ public class HourlyWeatherControllerTests {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.location", is(expectedLocation)))
         .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/hourly")))
+        .andExpect(jsonPath("$._links.realtime_weather.href", is("http://localhost/v1/realtime")))
+        .andExpect(jsonPath("$._links.daily_forecast.href", is("http://localhost/v1/daily")))
+        .andExpect(jsonPath("$._links.full_forecast.href", is("http://localhost/v1/full")))
         .andDo(print());
     }
 
@@ -153,12 +159,13 @@ public class HourlyWeatherControllerTests {
         Integer currentHour = 9;
         String locationCode = "NYC_USA";
         String requestUrl = END_POINT_PATH + "/" + locationCode;
-        Location location = new Location();
-        location.setCode(locationCode);
-        location.setCityName("New York City");
-        location.setRegionName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
+
+        Location location = new Location()
+        .code(locationCode)
+        .cityName("New York City")
+        .regionName("New York")
+        .countryCode("US")
+        .countryName("United States of America");
 
         HourlyWeather forecast1 = new HourlyWeather()
         .location(location)
@@ -178,9 +185,14 @@ public class HourlyWeatherControllerTests {
 
         mockMvc.perform(get(requestUrl).header(X_CURRENT_HOUR, String.valueOf(currentHour)))
         .andExpect(status().isOk())
-        .andExpect(content().contentType("application/json"))
+        .andExpect(content().contentType(RESPONSE_CONTENT_TYPE))
         .andExpect(jsonPath("$.location", is(location.toString())))
         .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/hourly/" + locationCode)))
+        .andExpect(jsonPath("$._links.realtime_weather.href", is("http://localhost/v1/realtime/" + locationCode)))
+        .andExpect(jsonPath("$._links.daily_forecast.href", is("http://localhost/v1/daily/" + locationCode)))
+        .andExpect(jsonPath("$._links.full_forecast.href", is("http://localhost/v1/full/" + locationCode)))
+
         .andDo(print());
     }
 
@@ -189,7 +201,7 @@ public class HourlyWeatherControllerTests {
         String requestUrl = END_POINT_PATH + "/NYC_USA";
         List<HourlyWeatherDTO> listDTO = Collections.emptyList();
         String requestBody = objectMapper.writeValueAsString(listDTO);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors[0]", is("Hourly forecast data cannot be empty")))
         .andDo(print());
@@ -212,7 +224,7 @@ public class HourlyWeatherControllerTests {
         .status("");
 
         String requestBody = objectMapper.writeValueAsString(List.of(dto1, dto2));
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.errors[0]", containsString("Precipitation must be in the range of 0 to 100 percentage")))
         .andDo(print());
@@ -232,7 +244,7 @@ public class HourlyWeatherControllerTests {
         List<HourlyWeatherDTO> listDTO = List.of(dto1);
         String requestBody = objectMapper.writeValueAsString(listDTO);
         when(hourlyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenThrow(LocationNotFoundException.class);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(REQUEST_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isNotFound())
         .andDo(print());
     }
@@ -254,12 +266,12 @@ public class HourlyWeatherControllerTests {
         .precipitation(60)
         .status("Sunny");
 
-        Location location = new Location();
-        location.setCode(locationCode);
-        location.setCityName("New York City");
-        location.setCityName("New York");
-        location.setCountryCode("US");
-        location.setCountryName("United States of America");
+        Location location = new Location()
+        .code(locationCode)
+        .cityName("New York City")
+        .regionName("New York")
+        .countryCode("US")
+        .countryName("United States of America");
 
         HourlyWeather forecast1 = new HourlyWeather()
         .location(location)
@@ -281,9 +293,13 @@ public class HourlyWeatherControllerTests {
         when(hourlyWeatherService.updateByLocationCode(Mockito.eq(locationCode), Mockito.anyList())).thenReturn(listHourlyWeather);
 
         String requestBody = objectMapper.writeValueAsString(listDTO);
-        mockMvc.perform(put(requestUrl).contentType("application/json").content(requestBody))
+        mockMvc.perform(put(requestUrl).contentType(RESPONSE_CONTENT_TYPE).content(requestBody))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.hourly_forecast[0].hour_of_day", is(10)))
+        .andExpect(jsonPath("$._links.self.href", is("http://localhost/v1/hourly/" + locationCode)))
+        .andExpect(jsonPath("$._links.realtime_weather.href", is("http://localhost/v1/realtime/" + locationCode)))
+        .andExpect(jsonPath("$._links.daily_forecast.href", is("http://localhost/v1/daily/" + locationCode)))
+        .andExpect(jsonPath("$._links.full_forecast.href", is("http://localhost/v1/full/" + locationCode)))
         .andDo(print());
     }
 }

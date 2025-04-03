@@ -12,10 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-@SuppressWarnings("rawtypes")
 @Getter
 @Setter
-public class RealtimeWeatherDTO extends RepresentationModel{
+public class RealtimeWeatherDTO extends RepresentationModel<RealtimeWeatherDTO>{
     
     private String location;
 

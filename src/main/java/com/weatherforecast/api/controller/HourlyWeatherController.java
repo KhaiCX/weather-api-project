@@ -1,5 +1,8 @@
 package com.weatherforecast.api.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +59,7 @@ public class HourlyWeatherController {
                 return ResponseEntity.noContent().build();
             }
 
-            return ResponseEntity.ok().body(listEntity2DTO(hourlyForecast));
+            return ResponseEntity.ok().body(addLinksByIp(listEntity2DTO(hourlyForecast)));
         } catch (NumberFormatException | GeolocationException exception) {
             return ResponseEntity.badRequest().build();
 
@@ -77,7 +80,7 @@ public class HourlyWeatherController {
                 return ResponseEntity.noContent().build();
             }
 
-            return ResponseEntity.ok().body(listEntity2DTO(hourlyForecast));
+            return ResponseEntity.ok().body(addLinksByLocation(listEntity2DTO(hourlyForecast), locationCode));
         } catch (NumberFormatException exception) {
             return ResponseEntity.badRequest().build();
 
@@ -96,7 +99,7 @@ public class HourlyWeatherController {
         listHourlyWeather.forEach(System.out::println);
         try {
             List<HourlyWeather> updateHourlyWeather = hourlyWeatherService.updateByLocationCode(locationCode, listHourlyWeather);
-            return ResponseEntity.ok().body(listEntity2DTO(updateHourlyWeather));
+            return ResponseEntity.ok().body(addLinksByLocation(listEntity2DTO(updateHourlyWeather), locationCode));
         } catch (LocationNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -122,6 +125,22 @@ public class HourlyWeatherController {
         });
         listDTO.setHourlyForecast(dtos);
         return listDTO;
+    }
+
+    private HourlyWeatherListDTO addLinksByIp(HourlyWeatherListDTO dtos) {
+        dtos.add(linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByIPAddress(null)).withSelfRel());
+        dtos.add(linkTo(methodOn(RealtimeWeatherController.class).getRealtimeWeatherByIPAddress(null)).withRel("realtime_weather"));
+        dtos.add(linkTo(methodOn(DailyWeatherController.class).listDailyForecastByIPAddress(null)).withRel("daily_forecast"));
+        dtos.add(linkTo(methodOn(FullWeatherController.class).getFullWeatherByIPAddress(null)).withRel("full_forecast"));
+        return dtos;
+    }
+
+    private HourlyWeatherListDTO addLinksByLocation(HourlyWeatherListDTO dtos, String locationCode) {
+        dtos.add(linkTo(methodOn(HourlyWeatherController.class).listHourlyForecastByLocationCode(locationCode, null)).withSelfRel());
+        dtos.add(linkTo(methodOn(RealtimeWeatherController.class).getRealtimeWeatherByLocationCode(locationCode)).withRel("realtime_weather"));
+        dtos.add(linkTo(methodOn(DailyWeatherController.class).listDailyForecastByLocationCode(locationCode)).withRel("daily_forecast"));
+        dtos.add(linkTo(methodOn(FullWeatherController.class).getFullWeatherByLocationCode(locationCode)).withRel("full_forecast"));
+        return dtos;
     }
 
 }
