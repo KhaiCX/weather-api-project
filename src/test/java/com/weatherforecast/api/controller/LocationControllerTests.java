@@ -1,11 +1,14 @@
 package com.weatherforecast.api.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -103,6 +106,7 @@ public class LocationControllerTests {
     }
 
     @Test
+    @Disabled
     public void testListShouldReturn204NoContent() throws Exception {
         Mockito.when(locationService.list()).thenReturn(Collections.emptyList());
         mockMvc.perform(get(END_POINT_PATH))
@@ -111,9 +115,32 @@ public class LocationControllerTests {
     }
 
     @Test
+    public void testListByPageReturn204NoContent() throws Exception {
+        Mockito.when(locationService.listByPage(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString())).thenReturn(Page.empty());
+        mockMvc.perform(get(END_POINT_PATH))
+        .andExpect(status().isNoContent())
+        .andDo(print());
+    }
+
+    @Test
+    @Disabled
     public void testListShouldReturn200OK() throws Exception {
 
         Mockito.when(locationService.list()).thenReturn(List.of(location1, location2));
+
+        mockMvc.perform(get(END_POINT_PATH))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("application/json"))
+        .andExpect(jsonPath("$[0].code", is("NYC_USA")))
+        .andExpect(jsonPath("$[1].code", is("LACA_USA")))
+        .andDo(print());
+    }
+
+    @Test
+    public void testListByPageReturn200OK() throws Exception {
+
+        Page<Location> page = new PageImpl<>(List.of(location1, location2));
+        Mockito.when(locationService.listByPage(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString())).thenReturn(page);
 
         mockMvc.perform(get(END_POINT_PATH))
         .andExpect(status().isOk())
@@ -144,6 +171,16 @@ public class LocationControllerTests {
 
     @Test
     public void testGetShouldReturn200OK() throws Exception {
+        String code = "NYC_USA";
+        Mockito.when(locationService.get(code)).thenReturn(location1);
+        String requestUrl = END_POINT_PATH + "/" + code;
+        mockMvc.perform(get(requestUrl))
+        .andExpect(status().isOk())
+        .andDo(print());
+    }
+
+    @Test
+    public void testListByPageShouldReturn200OK() throws Exception {
         String code = "NYC_USA";
         Mockito.when(locationService.get(code)).thenReturn(location1);
         String requestUrl = END_POINT_PATH + "/" + code;

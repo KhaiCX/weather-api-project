@@ -4,18 +4,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.weatherforecast.api.entity.DailyWeather;
 import com.weatherforecast.api.entity.HourlyWeather;
@@ -30,17 +38,28 @@ public class LocationRepositoryTests {
     private LocationRepository locationRepository;
 
     private Location mockLocation;
+    private Location mockLocation2;
 
     @BeforeEach
     public void createData() {
-        mockLocation = new Location();
-        mockLocation.setCode("MBMH_IN");
-        mockLocation.setCityName("Munbai");
-        mockLocation.setRegionName("Maharashtra");
-        mockLocation.setCountryCode("IN");
-        mockLocation.setCountryName("India");
-        mockLocation.setEnabled(true);
-        mockLocation.setTrashed(false);
+
+        mockLocation = new Location()
+        .code("MBMH_IN")
+        .cityName("Munbai")
+        .regionName("Maharashtra")
+        .countryCode("IN")
+        .countryName("India")
+        .enabled(true)
+        .trashed(false);
+
+        mockLocation2 = new Location()
+        .code("NYC_USA")
+        .cityName("Munbai")
+        .regionName("Maharashtra")
+        .countryCode("IN")
+        .countryName("India")
+        .enabled(true)
+        .trashed(false);
     }
 
     @Test
@@ -56,12 +75,58 @@ public class LocationRepositoryTests {
     }
 
     @Test
+    @Disabled
     public void testListSuccess() {
         List<Location> mockLocationList = List.of(mockLocation);
         Mockito.when(locationRepository.findUnTrashed()).thenReturn(mockLocationList);
         List<Location> locations = locationRepository.findUnTrashed();
         assertEquals(locations.size(), mockLocationList.size());
         locations.forEach(System.out::println);
+    }
+
+    @Test
+    public void testListFirstPage() {
+        int pageSize = 1;
+        int pageNum = 1;
+        List<Location> locations = List.of(mockLocation);
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<Location> mockPage = new PageImpl<>(locations, pageable, locations.size());
+
+        Mockito.when(locationRepository.findUnTrashed(pageable)).thenReturn(mockPage);
+
+        Page<Location> page = locationRepository.findUnTrashed(pageable);
+        assertEquals(page.getSize(), mockPage.getSize());
+        assertEquals(page.getTotalPages(), mockPage.getTotalPages());
+    }
+
+    @Test
+    public void testListPageNoContent() {
+        int pageSize = 1;
+        int pageNum = 10;
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<Location> mockPage = new PageImpl<>(Collections.emptyList(), pageable, Collections.emptyList().size());
+        Mockito.when(locationRepository.findUnTrashed(pageable)).thenReturn(mockPage);
+        Page<Location> page = locationRepository.findUnTrashed(pageable);
+        assertTrue(page.isEmpty());
+    }
+
+    @Test
+    public void testList2ndPageWithSort() {
+        int pageSize = 1;
+        int pageNum = 0;
+
+        Sort sort = Sort.by("code").ascending();
+
+        List<Location> locations = List.of(mockLocation, mockLocation2);
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+        Page<Location> mockPage = new PageImpl<>(locations, pageable, locations.size());
+
+        Mockito.when(locationRepository.findUnTrashed(pageable)).thenReturn(mockPage);
+
+        Page<Location> page = locationRepository.findUnTrashed(pageable);
+        assertEquals(page.getSize(), mockPage.getSize());
+        assertEquals(page.getTotalPages(), mockPage.getTotalPages());
+        assertEquals(page.getSize(), pageSize);
     }
 
     @Test
