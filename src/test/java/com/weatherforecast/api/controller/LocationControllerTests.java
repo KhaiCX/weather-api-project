@@ -123,6 +123,45 @@ public class LocationControllerTests {
     }
 
     @Test
+    public void testListByPageReturn400BadRequestInvalidPageNum() throws Exception {
+        int pageNum = 0;
+        int pageSize = 5;
+        String sortField = "code";
+        Mockito.when(locationService.listByPage(pageNum, pageSize, sortField)).thenReturn(Page.empty());
+
+        String requestURI = END_POINT_PATH + "?pageNum=" + pageNum + "&size=" + pageSize + "&sort=" + sortField;
+        mockMvc.perform(get(requestURI))
+        .andExpect(status().isBadRequest())
+        .andDo(print());
+    }
+
+    @Test
+    public void testListByPageReturn400BadRequestInvalidPageSize() throws Exception {
+        int pageNum = 1;
+        int pageSize = 3;
+        String sortField = "code";
+        Mockito.when(locationService.listByPage(pageNum, pageSize, sortField)).thenReturn(Page.empty());
+
+        String requestURI = END_POINT_PATH + "?pageNum=" + pageNum + "&size=" + pageSize + "&sort=" + sortField;
+        mockMvc.perform(get(requestURI))
+        .andExpect(status().isBadRequest())
+        .andDo(print());
+    }
+
+    @Test
+    public void testListByPageReturn400BadRequestInvalidSortField() throws Exception {
+        int pageNum = 1;
+        int pageSize = 5;
+        String sortField = "code_test";
+        Mockito.when(locationService.listByPage(pageNum, pageSize, sortField)).thenReturn(Page.empty());
+
+        String requestURI = END_POINT_PATH + "?pageNum=" + pageNum + "&size=" + pageSize + "&sort=" + sortField;
+        mockMvc.perform(get(requestURI))
+        .andExpect(status().isBadRequest())
+        .andDo(print());
+    }
+
+    @Test
     @Disabled
     public void testListShouldReturn200OK() throws Exception {
 
