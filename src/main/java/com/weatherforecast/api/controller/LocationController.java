@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -81,7 +84,7 @@ public class LocationController {
                 return ResponseEntity.noContent().build();
             }
 
-            return ResponseEntity.ok().body(listEntity2ListDTO(locations));
+            return ResponseEntity.ok().body(addPageMetaData(listEntity2ListDTO(locations), page));
         }
 
     @GetMapping("/{code}")
@@ -116,6 +119,17 @@ public class LocationController {
 
     private Location dto2Entity(LocationDTO dto) {
         return modelMapper.map(dto, Location.class);
+    }
+
+    private CollectionModel<LocationDTO> addPageMetaData(List<LocationDTO> dtos, Page<Location> pageInfo) {
+        int pageSize = pageInfo.getSize();
+        int pageNum = pageInfo.getNumber() + 1;
+        long totalElements = pageInfo.getTotalElements();
+
+        PageMetadata pageMetadata = new PageMetadata(pageSize, pageNum, totalElements);
+        CollectionModel<LocationDTO> collectionModel = PagedModel.of(dtos, pageMetadata);
+
+        return collectionModel;
     }
 
 }

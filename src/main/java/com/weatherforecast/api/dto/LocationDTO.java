@@ -1,6 +1,7 @@
 package com.weatherforecast.api.dto;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.hateoas.server.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +14,7 @@ import lombok.Setter;
 @JsonPropertyOrder({"code", "city_name", "region_name", "country_code", "country_name", "enabled"})
 @Getter
 @Setter
+@Relation(collectionRelation = "locations")
 public class LocationDTO {
     @NotNull(message = "Location code cannot be null")
     @Length(min = 3, max = 12, message = "Location code must have 3-12 characters")
@@ -39,4 +41,34 @@ public class LocationDTO {
     private String countryName;
 
     private Boolean enabled;
+
+    public LocationDTO code(String code) {
+        setCode(code);
+        return this;
+    }
+
+    public LocationDTO cityName(String cityName) {
+        setCityName(cityName);
+        return this;
+    }
+
+    public LocationDTO regionName(String regionName) {
+        setRegionName(regionName);
+        return this;
+    }
+
+    public LocationDTO countryCode(String countryCode) {
+        setCountryCode(countryCode);
+        return this;
+    }
+
+    public LocationDTO countryName(String countryName) {
+        setCountryName(countryName);
+        return this;
+    }
+
+    public LocationDTO enabled(Boolean enabled) {
+        setEnabled(enabled);
+        return this;
+    }
 }

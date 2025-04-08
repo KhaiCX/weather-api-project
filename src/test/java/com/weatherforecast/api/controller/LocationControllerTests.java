@@ -9,6 +9,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,30 +58,30 @@ public class LocationControllerTests {
 
     @BeforeEach
     public void createData() {
-        location1 = new Location();
-        location1.setCode("NYC_USA");
-        location1.setCityName("New York City");
-        location1.setRegionName("New York");
-        location1.setCountryCode("US");
-        location1.setCountryName("United States of America");
-        location1.setEnabled(true);
+        location1 = new Location()
+        .code("NYC_USA")
+        .cityName("New York City")
+        .regionName("New York")
+        .countryCode("US")
+        .countryName("United States of America")
+        .enabled(true);
 
-        location2 = new Location();
-        location2.setCode("LACA_USA");
-        location2.setCityName("Los Angerles City");
-        location2.setRegionName("Los Angerles");
-        location2.setCountryCode("US");
-        location2.setCountryName("United States of Los Angerles");
-        location2.setEnabled(true);
-        location2.setTrashed(true);
+        location2 = new Location()
+        .code("DIHLI_IN")
+        .cityName("New York City")
+        .regionName("New York")
+        .countryCode("US")
+        .countryName("United States of America")
+        .enabled(true)
+        .trashed(true);
 
-        dto = new LocationDTO();
-        dto.setCode(location1.getCode());
-        dto.setCityName(location1.getCityName());
-        dto.setCountryCode(location1.getCountryCode());
-        dto.setCountryName(location1.getCountryName());
-        dto.setRegionName(location1.getRegionName());
-        dto.setEnabled(location1.getEnabled());
+        dto = new LocationDTO()
+        .code(location1.getCode())
+        .cityName(location1.getCityName())
+        .regionName(location1.getRegionName())
+        .countryCode(location1.getCountryCode())
+        .countryName(location1.getCountryName())
+        .enabled(location1.getEnabled());
     }
     
     @Test
@@ -178,14 +181,31 @@ public class LocationControllerTests {
     @Test
     public void testListByPageReturn200OK() throws Exception {
 
-        Page<Location> page = new PageImpl<>(List.of(location1, location2));
-        Mockito.when(locationService.listByPage(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString())).thenReturn(page);
+        List<Location> locations = List.of(location1, location2);
+        int pageNum = 1;
+        int pageSize = 5;
+        String sortField = "code";
 
-        mockMvc.perform(get(END_POINT_PATH))
+        int totalElements = locations.size();
+        Sort sort = Sort.by(sortField);
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+        Page<Location> page = new PageImpl<>(locations, pageable, totalElements);
+
+        Mockito.when(locationService.listByPage(pageNum - 1, pageSize, sortField)).thenReturn(page);
+
+        String requestURI = END_POINT_PATH + "?pageNum=" + pageNum + "&size=" + pageSize + "&sort=" + sortField;
+
+        mockMvc.perform(get(requestURI))
         .andExpect(status().isOk())
-        .andExpect(content().contentType("application/json"))
-        .andExpect(jsonPath("$[0].code", is("NYC_USA")))
-        .andExpect(jsonPath("$[1].code", is("LACA_USA")))
+        .andExpect(content().contentType("application/hal+json"))
+        .andExpect(jsonPath("$._embedded.locations[0].code", is("NYC_USA")))
+        .andExpect(jsonPath("$._embedded.locations[0].city_name", is("New York City")))
+        .andExpect(jsonPath("$._embedded.locations[1].code", is("DIHLI_IN")))
+        .andExpect(jsonPath("$._embedded.locations[1].city_name", is("New York City")))
+        .andExpect(jsonPath("$.page.size", is(pageSize)))
+        .andExpect(jsonPath("$.page.number", is(pageNum + 1)))
+        .andExpect(jsonPath("$.page.totalElements", is(totalElements)))
+        .andExpect(jsonPath("$.page.totalPages", is(1)))
         .andDo(print());
     }
 
