@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.PagedModel.PageMetadata;
 import org.springframework.http.ResponseEntity;
@@ -84,7 +88,7 @@ public class LocationController {
                 return ResponseEntity.noContent().build();
             }
 
-            return ResponseEntity.ok().body(addPageMetaData(listEntity2ListDTO(locations), page));
+            return ResponseEntity.ok().body(addPageMetaDataAndLink2Collection(listEntity2ListDTO(locations), page, sortField));
         }
 
     @GetMapping("/{code}")
@@ -121,14 +125,40 @@ public class LocationController {
         return modelMapper.map(dto, Location.class);
     }
 
-    private CollectionModel<LocationDTO> addPageMetaData(List<LocationDTO> dtos, Page<Location> pageInfo) {
+    private CollectionModel<LocationDTO> addPageMetaDataAndLink2Collection(List<LocationDTO> dtos, Page<Location> pageInfo, String sortField) throws BadRequestException {
+
+        //add self link to each invididual location
+        for (LocationDTO dto: dtos) {
+            dto.add(linkTo(methodOn(LocationController.class).getLocation(dto.getCode())).withSelfRel());
+        }
+
         int pageSize = pageInfo.getSize();
         int pageNum = pageInfo.getNumber() + 1;
         long totalElements = pageInfo.getTotalElements();
+        int totalPages = pageInfo.getTotalPages();
 
         PageMetadata pageMetadata = new PageMetadata(pageSize, pageNum, totalElements);
         CollectionModel<LocationDTO> collectionModel = PagedModel.of(dtos, pageMetadata);
 
+        //add self link to location
+        collectionModel.add(linkTo(methodOn(LocationController.class).listLocations(pageNum, pageSize, sortField)).withSelfRel());
+
+        if (pageNum > 1) {
+            //add link to first page if the current page is not a first one
+            collectionModel.add(linkTo(methodOn(LocationController.class).listLocations(1, pageSize, sortField)).withRel(IanaLinkRelations.FIRST));
+
+            //add link to the previous page if the current page is not a first one
+            collectionModel.add(linkTo(methodOn(LocationController.class).listLocations(pageNum - 1, pageSize, sortField)).withRel(IanaLinkRelations.PREV));
+        }
+
+        if (pageNum < totalPages) {
+            //add link to next page if the current page is not a first one
+            collectionModel.add(linkTo(methodOn(LocationController.class).listLocations(pageNum + 1, pageSize, sortField)).withRel(IanaLinkRelations.NEXT));
+
+            //add link to last page if the current page is not a first one
+            collectionModel.add(linkTo(methodOn(LocationController.class).listLocations(totalPages, pageSize, sortField)).withRel(IanaLinkRelations.LAST));
+
+        }
         return collectionModel;
     }
 

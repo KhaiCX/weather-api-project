@@ -1,6 +1,7 @@
 package com.weatherforecast.api.dto;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Relation(collectionRelation = "locations")
-public class LocationDTO {
+public class LocationDTO extends CollectionModel<LocationDTO> {
     @NotNull(message = "Location code cannot be null")
     @Length(min = 3, max = 12, message = "Location code must have 3-12 characters")
     private String code;
