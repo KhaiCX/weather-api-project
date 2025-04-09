@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.weatherforecast.api.entity.Location;
 
 @Repository
-public interface LocationRepository extends CrudRepository<Location, String>, PagingAndSortingRepository<Location, String> {
+public interface LocationRepository extends FilterableLocationRepository, CrudRepository<Location, String>, PagingAndSortingRepository<Location, String> {
 
     @Query("SELECT l FROM Location l WHERE l.trashed = false")
     @Deprecated
