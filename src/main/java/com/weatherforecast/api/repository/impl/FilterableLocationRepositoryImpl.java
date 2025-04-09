@@ -33,19 +33,8 @@ public class FilterableLocationRepositoryImpl implements FilterableLocationRepos
         CriteriaQuery<Location> query = builder.createQuery(Location.class);
 
         Root<Location> root = query.from(Location.class);
-        if (filterFields.isEmpty()) {
-            Predicate[] predicate = new Predicate[filterFields.size()];
-            Iterator<String> iterator = filterFields.keySet().iterator();
-            int i = 0;
-            while (iterator.hasNext()) {
-                String fieldName = iterator.next();
-                Object fieldValue = filterFields.get(fieldName);
-
-                System.out.println(fieldName + " => " + fieldValue);
-                predicate[i++] = builder.equal(root.get(fieldName), fieldValue);
-            }
-            query.where(predicate);
-        }
+        Predicate[] predicates = createPredicates(filterFields, builder, root);
+        if (predicates.length > 0) query.where(predicates);
         List<Order> orderList = new ArrayList<>();
 
         pageable.getSort().forEach(order -> {
@@ -60,9 +49,42 @@ public class FilterableLocationRepositoryImpl implements FilterableLocationRepos
 
         List<Location> listResults = typedQuery.getResultList();
 
-        int totalRows = 0;
+        long totalRows = getTotalRow(filterFields);
 
         return new PageImpl<>(listResults, pageable, totalRows);
+    }
+
+    private Predicate[] createPredicates(Map<String, Object> filterFields, CriteriaBuilder builder, Root<Location> root) {
+
+        Predicate[] predicates = new Predicate[filterFields.size()];
+
+        if (filterFields.isEmpty()) {
+            Iterator<String> iterator = filterFields.keySet().iterator();
+            int i = 0;
+
+            while (iterator.hasNext()) {
+                String fieldName = iterator.next();
+                Object fieldValue = filterFields.get(fieldName);
+
+                System.out.println(fieldName + " => " + fieldValue);
+                predicates[i++] = builder.equal(root.get(fieldName), fieldValue);
+            }
+        }
+        return predicates;
+    }
+
+    private long getTotalRow(Map<String, Object> filterFields) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+
+        Root<Location> root = countQuery.from(Location.class);
+        countQuery.select(builder.count(root));
+
+        Predicate[] predicates = createPredicates(filterFields, builder, root);
+        if (predicates.length > 0) countQuery.where(predicates);
+
+        Long rowCount = entityManager.createQuery(countQuery).getSingleResult();
+        return rowCount;
     }
 
 }
