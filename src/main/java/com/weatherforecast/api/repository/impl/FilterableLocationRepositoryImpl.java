@@ -56,7 +56,7 @@ public class FilterableLocationRepositoryImpl implements FilterableLocationRepos
 
     private Predicate[] createPredicates(Map<String, Object> filterFields, CriteriaBuilder builder, Root<Location> root) {
 
-        Predicate[] predicates = new Predicate[filterFields.size()];
+        Predicate[] predicates = new Predicate[filterFields.size() + 1];
 
         if (filterFields.isEmpty()) {
             Iterator<String> iterator = filterFields.keySet().iterator();
@@ -70,6 +70,8 @@ public class FilterableLocationRepositoryImpl implements FilterableLocationRepos
                 predicates[i++] = builder.equal(root.get(fieldName), fieldValue);
             }
         }
+
+        predicates[predicates.length - 1] = builder.equal(root.get("trashed"), false);
         return predicates;
     }
 

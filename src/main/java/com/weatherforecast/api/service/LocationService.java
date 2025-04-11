@@ -1,6 +1,7 @@
 package com.weatherforecast.api.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.data.domain.Page;
@@ -34,12 +35,21 @@ public class LocationService extends AbstractLocationService {
         return locationRepository.findUnTrashed();
     }
 
+    @Deprecated
     public Page<Location> listByPage(Integer pageSize, Integer pageNum, String sortField) {
         Sort sort = Sort.by(sortField).ascending();
 
         Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
         return locationRepository.findUnTrashed(pageable);
+    }
+
+    public Page<Location> listByPage(Integer pageSize, Integer pageNum, String sortField, Map<String, Object> filterFields) {
+        Sort sort = Sort.by(sortField).ascending();
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+
+        return locationRepository.listWithFilter(pageable, filterFields);
     }
 
     public Location update(Location locationInRequest) {

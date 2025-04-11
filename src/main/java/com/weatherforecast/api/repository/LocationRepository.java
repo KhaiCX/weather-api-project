@@ -20,6 +20,7 @@ public interface LocationRepository extends FilterableLocationRepository, CrudRe
     List<Location> findUnTrashed();
 
     @Query("SELECT l FROM Location l WHERE l.trashed = false")
+    @Deprecated
     public Page<Location> findUnTrashed(Pageable pageable);
 
     @Query("SELECT l FROM Location l WHERE l.code = :code and l.trashed = false")
